@@ -6,7 +6,7 @@
 namespace image {
 
 /**
- * Image class represents any image type
+ * Image class represents interface over image types
  */
 template<typename ImageOperator, typename ColorOperator>
 class Image
