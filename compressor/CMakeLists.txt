@@ -1,5 +1,6 @@
 set(HEADER_FILES
-    include/algorithm.hpp
+    include/image_algorithms.hpp
+    include/seam.hpp
     include/image.hpp
     
     include/BMP/bmp_color.hpp
@@ -7,7 +8,7 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-    src/algorithm.cpp
+    src/image_algorithms.cpp
     src/image.tpp
     
     src/BMP/bmp_color.cpp
@@ -28,5 +29,6 @@ target_include_directories(libCompressor
 target_include_directories(libCompressor
     PUBLIC    
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/BMP> 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
         $<INSTALL_INTERFACE:lib/include/BMP>
 )
