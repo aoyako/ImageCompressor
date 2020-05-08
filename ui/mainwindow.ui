@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>686</width>
+    <height>471</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Image</string>
+        </property>
+        <widget class="QLineEdit" name="img_heigh">
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>50</y>
+           <width>91</width>
+           <height>27</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>30</y>
+           <width>66</width>
+           <height>19</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Width:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_2">
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>30</y>
+           <width>66</width>
+           <height>19</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Height:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_5">
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>100</y>
+           <width>91</width>
+           <height>19</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>New Height:</string>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_6">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>100</y>
+           <width>91</width>
+           <height>19</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>New Width:</string>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="img_width">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>50</y>
+           <width>91</width>
+           <height>27</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="new_width">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>120</y>
+           <width>91</width>
+           <height>27</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QLineEdit" name="new_height">
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>120</y>
+           <width>91</width>
+           <height>27</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>190</y>
+           <width>668</width>
+           <height>183</height>
+          </rect>
+         </property>
+         <property name="title">
+          <string>Parameters</string>
+         </property>
+         <widget class="QPushButton" name="process">
+          <property name="geometry">
+           <rect>
+            <x>290</x>
+            <y>150</y>
+            <width>101</width>
+            <height>27</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Process</string>
+          </property>
+         </widget>
+         <widget class="QCheckBox" name="checkBox">
+          <property name="geometry">
+           <rect>
+            <x>550</x>
+            <y>40</y>
+            <width>92</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Autosave</string>
+          </property>
+         </widget>
+         <widget class="QSpinBox" name="hight_color_border">
+          <property name="geometry">
+           <rect>
+            <x>150</x>
+            <y>30</y>
+            <width>81</width>
+            <height>30</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QSpinBox" name="low_color_border">
+          <property name="geometry">
+           <rect>
+            <x>150</x>
+            <y>80</y>
+            <width>81</width>
+            <height>28</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_7">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>40</y>
+            <width>131</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Hight color border</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_8">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>90</y>
+            <width>131</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Low color border</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_11">
+          <property name="geometry">
+           <rect>
+            <x>270</x>
+            <y>40</y>
+            <width>131</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Hight color addition</string>
+          </property>
+         </widget>
+         <widget class="QSpinBox" name="hight_color_addition">
+          <property name="geometry">
+           <rect>
+            <x>410</x>
+            <y>30</y>
+            <width>81</width>
+            <height>30</height>
+           </rect>
+          </property>
+         </widget>
+         <widget class="QLabel" name="label_12">
+          <property name="geometry">
+           <rect>
+            <x>270</x>
+            <y>90</y>
+            <width>131</width>
+            <height>19</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Low color addition</string>
+          </property>
+         </widget>
+         <widget class="QSpinBox" name="low_color_addition">
+          <property name="geometry">
+           <rect>
+            <x>410</x>
+            <y>80</y>
+            <width>81</width>
+            <height>28</height>
+           </rect>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0">
+     <widget class="QProgressBar" name="progressBar">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="value">
+       <number>24</number>
+      </property>
+      <property name="textVisible">
+       <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>686</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuOpen">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpen"/>
+   </widget>
+   <addaction name="menuOpen"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
