@@ -8,7 +8,7 @@ set(HEADER_FILES
 
 set(SOURCE_FILES
     src/algorithm.cpp
-    src/image.cpp
+    src/image.tpp
     
     src/BMP/bmp_color.cpp
     src/BMP/bmp_image.cpp

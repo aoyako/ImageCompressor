@@ -14,38 +14,6 @@ constexpr const int MAX_BORDER_COLOR = 200;
 constexpr const int MAX_ADDITION = 200;
 constexpr const int MID_ADDITION = 100;
 
-template<typename ImageOperator, typename ColorOperator>
-class Image
-{
-public:
-    Image(std::string filename) : image(filename) {}
-    Image(ImageOperator img) : image(img) {}
-    Image(const Image &img) : image(img.image) {}
-    Image(Image &&img) : image(std::move(img.image)) {}
-    ColorOperator pixel(int i, int j) const {
-        return image.pixel(i, j);
-    }
-    void setPixel(int i, int j, ColorOperator color) {
-        image.setPixel(i, j, color);
-    }
-    
-    void save(std::string filename) const{
-        image.save(filename);
-    }
-    
-    int width() const{
-        return image.width();
-    }
-    int height() const{
-        return image.height();
-    }
-    ImageOperator& getImage() {
-        return image;
-    }
-private:
-    ImageOperator image;
-};
-
 
 class BMPColor {
 public:

@@ -23,6 +23,6 @@ target_link_libraries(ImageCompressor PRIVATE
     Qt5::Widgets
 )
 
-# target_link_libraries(ImageCompressor PRIVATE
-#     libCompressor
-# )
+target_link_libraries(ImageCompressor PRIVATE
+    libCompressor
+)
