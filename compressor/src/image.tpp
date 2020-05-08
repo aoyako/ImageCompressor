@@ -21,13 +21,13 @@ namespace image {
     }
     
     template<typename ImageOperator, typename ColorOperator>
-    ColorOperator Image<ImageOperatorm ColorOperator>::pixel(size_t i, size_t j) const {
-        return image.pixel(i, j);
+    ColorOperator Image<ImageOperatorm ColorOperator>::pixel(size_t x, size_t y) const {
+        return image.pixel(x, y);
     }
     
     template<typename ImageOperator, typename ColorOperator>
-    Image<ImageOperatorm ColorOperator>::void setPixel(size_t i, size_t j, ColorOperator color) {
-        image.setPixel(i, j, color);
+    Image<ImageOperatorm ColorOperator>::void setPixel(size_t x, size_t y, ColorOperator color) {
+        image.setPixel(x, y, color);
     }
     
     template<typename ImageOperator, typename ColorOperator>

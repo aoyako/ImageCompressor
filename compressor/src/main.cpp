@@ -14,34 +14,6 @@ constexpr const int MAX_BORDER_COLOR = 200;
 constexpr const int MAX_ADDITION = 200;
 constexpr const int MID_ADDITION = 100;
 
-
-class BMPColor {
-public:
-    BMPColor(unsigned char red = 0, unsigned char green = 0, unsigned char blue = 0) : red_color(red), green_color(green), blue_color(blue) {}
-    BMPColor(const BMPColor &col) : red_color(col.red()), green_color(col.green()), blue_color(col.blue()) {}
-    BMPColor(BMPColor &&col) = default;
-    BMPColor& operator=(const BMPColor &col) = default;
-    
-    unsigned char red() const {
-        return red_color;
-    }
-    unsigned char green() const {
-        return green_color;
-    }
-    unsigned char blue() const {
-        return blue_color;
-    }
-private:
-    unsigned char red_color;
-    unsigned char green_color;
-    unsigned char blue_color;
-};
-
-void mycopy(BMPColor *begin, BMPColor *end, BMPColor *result) {
-    std::copy(begin, end, result);
-}
-
-
 class BMPImage
 {
 public:

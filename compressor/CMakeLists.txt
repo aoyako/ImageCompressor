@@ -22,7 +22,11 @@ add_library(libCompressor
 target_include_directories(libCompressor
     PUBLIC    
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> 
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/BMP> 
         $<INSTALL_INTERFACE:lib/include>
+)
+
+target_include_directories(libCompressor
+    PUBLIC    
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/BMP> 
         $<INSTALL_INTERFACE:lib/include/BMP>
 )
