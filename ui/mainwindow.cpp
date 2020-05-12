@@ -54,6 +54,10 @@ void MainWindow::on_actionOpen_triggered()
         ui->new_width->setValue(source_image.height());
         ui->new_height->setValue(source_image.height());
 
-        algorithm::SeamFinder
     }
+}
+
+void MainWindow::on_checkBox_stateChanged(int arg1)
+{
+    saver.setAutosave(arg1);
 }

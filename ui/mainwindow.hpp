@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 
+#include <image_container.hpp>
+#include <saver.hpp>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -18,7 +21,11 @@ public:
 private slots:
     void on_actionOpen_triggered();
 
+    void on_checkBox_stateChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
+    ImageSaver saver;
+    ImageContainer image;
 };
 #endif // MAINWINDOW_HPP

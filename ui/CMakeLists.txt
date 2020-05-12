@@ -15,7 +15,12 @@ set(SOURCE_FILES
   mainwindow.ui
 
   include/image_adapter.hpp
+  include/image_container.hpp
+  include/saver.hpp
+
   src/image_adapter.cpp
+  src/image_container.cpp
+  src/saver.cpp
 )
 
 add_executable(ImageCompressor ${SOURCE_FILES})
