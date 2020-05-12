@@ -30,6 +30,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->new_width->setRange(0, 8000);
     ui->new_height->setRange(0, 8000);
+
+    ui->process->setDisabled(true);
+
+    saver.setAutosave(false);
+    ui->checkBox->setDown(false);
 }
 
 MainWindow::~MainWindow()
@@ -45,6 +50,7 @@ void MainWindow::on_actionOpen_triggered()
 
     if(!file_name.isEmpty()&& !file_name.isNull()){
         QImage source_image(file_name);
+        image.setImage(source_image);
         ui->img_height->setEnabled(true);
         ui->img_width->setEnabled(true);
         ui->img_height->setReadOnly(true);
@@ -54,10 +60,16 @@ void MainWindow::on_actionOpen_triggered()
         ui->new_width->setValue(source_image.height());
         ui->new_height->setValue(source_image.height());
 
+        ui->process->setDisabled(false);
     }
 }
 
 void MainWindow::on_checkBox_stateChanged(int arg1)
 {
     saver.setAutosave(arg1);
+}
+
+void MainWindow::on_process_clicked()
+{
+    saver.save(image.image);
 }

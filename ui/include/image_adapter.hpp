@@ -11,7 +11,11 @@ class ImageWrapper
 {
 public:
     ImageWrapper(QImage *img);
+    ImageWrapper(image::BMPImage *img);
+
     operator image::Image<image::BMPImage, image::BMPColor>() const;
+    operator QImage() const;
 private:
-    QImage* image;
+    QImage *qimage;
+    image::BMPImage *bimage;
 };

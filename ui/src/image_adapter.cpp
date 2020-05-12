@@ -1,18 +1,38 @@
+#include <QPixmap>
+
 #include <image_adapter.hpp>
 
 ImageWrapper::ImageWrapper(QImage *img)
 {
-    image = img;
+    qimage = img;
+}
+
+ImageWrapper::ImageWrapper(image::BMPImage *img)
+{
+    bimage = img;
 }
 
 ImageWrapper::operator image::Image<image::BMPImage, image::BMPColor>() const
 {
-    image::BMPColor *data = new image::BMPColor [image->width()*image->height()];
-    for (int x = 0; x < image->width(); ++x) {
-        for (int y = 0; y < image->height(); ++y) {
-            QColor pixel = image->pixel(x, y);
-            data[y + x*image->height()] = image::BMPColor(pixel.red(), pixel.green(), pixel.blue());
+    image::BMPColor *data = new image::BMPColor [qimage->width()*qimage->height()];
+    for (int x = 0; x < qimage->width(); ++x) {
+        for (int y = 0; y < qimage->height(); ++y) {
+            QColor pixel = qimage->pixel(x, y);
+            data[y + x*qimage->height()] = image::BMPColor(pixel.red(), pixel.green(), pixel.blue());
         }
     }
-    return image::BMPImage(image->width(), image->height(), data);
+    return image::BMPImage(qimage->width(), qimage->height(), data);
+}
+
+ImageWrapper::operator QImage() const
+{
+    QImage image = QPixmap(bimage->width(), bimage->height()).toImage();
+    for (int x = 0; x < bimage->width(); ++x) {
+        for (int y = 0; y < bimage->height(); ++y) {
+            image::BMPColor pixel = bimage->pixel(x, y);
+            QColor col(pixel.red(), pixel.green(), pixel.blue());
+            image.setPixel(x, y, col.rgba());
+        }
+    }
+    return image;
 }

@@ -28,9 +28,6 @@ namespace algorithm {
 
     class Algorithm {
     public:
-//        template<typename Img, typename Color>
-//        image::Image<Img, Color> BordersTrace(std::string filename);
-    protected:
         template<typename Img, typename Color>
         image::Image<Img, Color> GrayLevel(const image::Image<Img, Color> &img) {
             image::Image<Img, Color> gray_img(img);
