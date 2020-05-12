@@ -1,7 +1,17 @@
-#include <bmp_image.hpp>
+#include <string.h>
+
+#include <BMP/bmp_image.hpp>
 
 
 namespace image {
+
+    BMPImage::BMPImage(size_t width, size_t height, BMPColor *data) {
+        /// Default metadata
+        memcpy(info, "\x42\x4d\x16\x47\x3f\x00\x00\x00\x00\x00\x36\x00\x00\x00\x28\x00\x00\x00\xac\x01\x00\x00\xce\x02\x00\x00\x01\x00\x18\x00\x00\x00\x00\x00\xe0\x46\x3f\x00\xe9\x24\x00\x00\xe9\x24\x00\x00\x00\x00\x00\x00\x00\x00", 54);
+        img_width = width;
+        img_height = height;
+        this->data = data;
+    }
     
     BMPImage::BMPImage(std::string filename) {
         std::ifstream file;

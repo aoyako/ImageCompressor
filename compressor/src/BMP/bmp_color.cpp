@@ -1,4 +1,4 @@
-#include <bmp_color.hpp>
+#include <BMP/bmp_color.hpp>
 
 namespace image {
     

@@ -6,17 +6,30 @@
 namespace algorithm {
     
     struct Params {
+        Params(size_t min_border_color, size_t max_border_color, size_t max_addition, size_t mid_addition) :
+            MIN_BORDER_COLOR(min_border_color),
+            MAX_BORDER_COLOR(max_border_color),
+            MAX_ADDITION(max_addition),
+            MID_ADDITION(mid_addition) {}
+        Params() = default;
+
+
         constexpr static double PI = 3.14159265358979323846;
-        static size_t MIN_BORDER_COLOR;
-        static size_t MAX_BORDER_COLOR;
-        static size_t MAX_ADDITION;
-        static size_t MID_ADDITION;
+        constexpr static size_t DEFAULT_MIN_BORDER_COLOR = 120;
+        constexpr static size_t DEFAULT_MAX_BORDER_COLOR = 200;
+        constexpr static size_t DEFAULT_MAX_ADDITION = 200;
+        constexpr static size_t DEFAULT_MID_ADDITION = 100;
+
+        size_t MIN_BORDER_COLOR = DEFAULT_MIN_BORDER_COLOR;
+        size_t MAX_BORDER_COLOR = DEFAULT_MAX_BORDER_COLOR;
+        size_t MAX_ADDITION = DEFAULT_MAX_ADDITION;
+        size_t MID_ADDITION = DEFAULT_MID_ADDITION;
     };
 
     class Algorithm {
     public:
-        template<typename Img, typename Color>
-        image::Image<Img, Color> BordersTrace(std::string filename);
+//        template<typename Img, typename Color>
+//        image::Image<Img, Color> BordersTrace(std::string filename);
     protected:
         template<typename Img, typename Color>
         image::Image<Img, Color> GrayLevel(const image::Image<Img, Color> &img) {
@@ -180,13 +193,13 @@ namespace algorithm {
             image::Image<Img, Color> result_image(img);
             for (int j = 1; j < result_image.height()-1; ++j) {
                 for (int i = 1; i < result_image.width()-1; ++i) {
-                    if (img.pixel(i, j).red() < Params::MIN_BORDER_COLOR) {
+                    if (img.pixel(i, j).red() < param.MIN_BORDER_COLOR) {
                         result_image.setPixel(i, j, Color(0, 0, 0));
-                    } else if ((img.pixel(i, j).red() < Params::MAX_BORDER_COLOR) && (img.pixel(i, j).red() > Params::MIN_BORDER_COLOR)) {
+                    } else if ((img.pixel(i, j).red() < param.MAX_BORDER_COLOR) && (img.pixel(i, j).red() > Params::MIN_BORDER_COLOR)) {
                         char color = 0;
                         for (int x = -1; x <= 1; ++x) {
                             for (int y = -1; y <= 1; ++y) {
-                                if (result_image.pixel(i, j).red() > Params::MAX_BORDER_COLOR) {
+                                if (result_image.pixel(i, j).red() > param.MAX_BORDER_COLOR) {
                                     color = img.pixel(i, j).red();
                                     break;
                                 }
@@ -198,6 +211,8 @@ namespace algorithm {
             }
             return result_image;
         }
+
+        Params param;
     };
     
     

@@ -25,7 +25,7 @@
         <property name="title">
          <string>Image</string>
         </property>
-        <widget class="QLineEdit" name="img_heigh">
+        <widget class="QLineEdit" name="img_height">
          <property name="geometry">
           <rect>
            <x>120</x>
@@ -92,26 +92,6 @@
           <rect>
            <x>20</x>
            <y>50</y>
-           <width>91</width>
-           <height>27</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="new_width">
-         <property name="geometry">
-          <rect>
-           <x>20</x>
-           <y>120</y>
-           <width>91</width>
-           <height>27</height>
-          </rect>
-         </property>
-        </widget>
-        <widget class="QLineEdit" name="new_height">
-         <property name="geometry">
-          <rect>
-           <x>120</x>
-           <y>120</y>
            <width>91</width>
            <height>27</height>
           </rect>
@@ -247,6 +227,26 @@
            </rect>
           </property>
          </widget>
+        </widget>
+        <widget class="QSpinBox" name="new_width">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>130</y>
+           <width>91</width>
+           <height>30</height>
+          </rect>
+         </property>
+        </widget>
+        <widget class="QSpinBox" name="new_height">
+         <property name="geometry">
+          <rect>
+           <x>120</x>
+           <y>130</y>
+           <width>91</width>
+           <height>30</height>
+          </rect>
+         </property>
         </widget>
        </widget>
       </item>

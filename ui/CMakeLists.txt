@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(compressor LANGUAGES CXX)
-
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(CMAKE_AUTOUIC ON)
@@ -15,6 +13,9 @@ set(SOURCE_FILES
   mainwindow.cpp
   mainwindow.hpp
   mainwindow.ui
+
+  include/image_adapter.hpp
+  src/image_adapter.cpp
 )
 
 add_executable(ImageCompressor ${SOURCE_FILES})
@@ -25,4 +26,10 @@ target_link_libraries(ImageCompressor PRIVATE
 
 target_link_libraries(ImageCompressor PRIVATE
     libCompressor
+)
+
+target_include_directories(libCompressor
+    PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}include/>
 )

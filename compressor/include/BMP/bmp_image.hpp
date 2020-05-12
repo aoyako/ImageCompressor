@@ -7,7 +7,7 @@
 #include <cstring>
 #include <algorithm>
 
-#include <bmp_color.hpp>
+#include <BMP/bmp_color.hpp>
 
 namespace image {
     /**
@@ -23,6 +23,11 @@ namespace image {
             HORISONTAL,
             VERTICAL
         };
+
+        /**
+         * Constructor from pieces
+         */
+        BMPImage(size_t width, size_t height, BMPColor *data);
         
         /**
          * Constructor from bmp file
