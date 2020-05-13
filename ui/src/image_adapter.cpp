@@ -18,7 +18,8 @@ ImageWrapper::operator image::Image<image::BMPImage, image::BMPColor>() const
     for (int x = 0; x < qimage->width(); ++x) {
         for (int y = 0; y < qimage->height(); ++y) {
             QColor pixel = qimage->pixel(x, y);
-            data[y + x*qimage->height()] = image::BMPColor(pixel.red(), pixel.green(), pixel.blue());
+            data[(qimage->height()-y-1)*qimage->width() + x] = image::BMPColor(pixel.red(), pixel.green(), pixel.blue());
+//            data[y + x*qimage->height()] = image::BMPColor(255, 0, 0);
         }
     }
     return image::BMPImage(qimage->width(), qimage->height(), data);
@@ -31,7 +32,7 @@ ImageWrapper::operator QImage() const
         for (int y = 0; y < bimage->height(); ++y) {
             image::BMPColor pixel = bimage->pixel(x, y);
             QColor col(pixel.red(), pixel.green(), pixel.blue());
-            image.setPixel(x, y, col.rgba());
+            image.setPixel(x, bimage->height()-y-1, col.rgba());
         }
     }
     return image;

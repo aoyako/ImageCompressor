@@ -24,12 +24,14 @@ namespace algorithm {
         size_t MAX_BORDER_COLOR = DEFAULT_MAX_BORDER_COLOR;
         size_t MAX_ADDITION = DEFAULT_MAX_ADDITION;
         size_t MID_ADDITION = DEFAULT_MID_ADDITION;
+
+        bool fat_lines = true;
     };
 
     class Algorithm {
     public:
         template<typename Img, typename Color>
-        image::Image<Img, Color> GrayLevel(const image::Image<Img, Color> &img) {
+        static image::Image<Img, Color> GrayLevel(const image::Image<Img, Color> &img, const Params &param) {
             image::Image<Img, Color> gray_img(img);
             for (int j = 0; j < gray_img.height(); ++j) {
                 for (int i = 0; i < gray_img.width(); ++i) {
@@ -41,7 +43,7 @@ namespace algorithm {
         }
         
         template<typename Img, typename Color>
-        image::Image<Img, Color> NoiseRemove(const image::Image<Img, Color> &img) {
+        static image::Image<Img, Color> NoiseRemove(const image::Image<Img, Color> &img, const Params &param) {
             image::Image<Img, Color> noise_img(img);
             
             int n = 3;
@@ -78,7 +80,7 @@ namespace algorithm {
         }
         
         template<typename Img, typename Color>
-        image::Image<Img, Color> SobelEdges(const image::Image<Img, Color> &img) {
+        static image::Image<Img, Color> SobelEdges(const image::Image<Img, Color> &img, const Params &param) {
             image::Image<Img, Color> result_image(img);
             
             int n = 3;
@@ -146,7 +148,12 @@ namespace algorithm {
                     result_image.setPixel(i, j, Color(magnitude, magnitude, magnitude));
                 }
             }
-            result_image.save("FAT.BMP");
+
+            if (param.fat_lines) {
+                delete[] sobel_image;
+                return result_image;
+            }
+//            result_image.save("FAT.BMP");
 
             for (int j = 1; j < result_image.height()-1; ++j) {
                 for (int i = 1; i < result_image.width()-1; ++i) {
@@ -186,13 +193,13 @@ namespace algorithm {
         }
         
         template<typename Img, typename Color>
-        image::Image<Img, Color> DoubleTreshold(const image::Image<Img, Color> &img) {
+        static image::Image<Img, Color> DoubleTreshold(const image::Image<Img, Color> &img, const Params &param) {
             image::Image<Img, Color> result_image(img);
             for (int j = 1; j < result_image.height()-1; ++j) {
                 for (int i = 1; i < result_image.width()-1; ++i) {
                     if (img.pixel(i, j).red() < param.MIN_BORDER_COLOR) {
                         result_image.setPixel(i, j, Color(0, 0, 0));
-                    } else if ((img.pixel(i, j).red() < param.MAX_BORDER_COLOR) && (img.pixel(i, j).red() > Params::MIN_BORDER_COLOR)) {
+                    } else if ((img.pixel(i, j).red() < param.MAX_BORDER_COLOR) && (img.pixel(i, j).red() > param.MIN_BORDER_COLOR)) {
                         char color = 0;
                         for (int x = -1; x <= 1; ++x) {
                             for (int y = -1; y <= 1; ++y) {

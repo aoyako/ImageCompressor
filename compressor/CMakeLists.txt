@@ -10,6 +10,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
     src/image_algorithms.cpp
     src/image.tpp
+    src/seam.cpp
     
     src/BMP/bmp_color.cpp
     src/BMP/bmp_image.cpp
