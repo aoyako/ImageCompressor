@@ -21,7 +21,14 @@ namespace image {
     Image<ImageOperator, ColorOperator>::Image(Image &&img) : image(std::move(img.image))
     {
     }
-    
+
+    template<typename ImageOperator, typename ColorOperator>
+    Image<ImageOperator, ColorOperator>& Image<ImageOperator, ColorOperator>::operator=(const Image &img)
+    {
+            image = img.image;
+            return *this;
+    }
+
     template<typename ImageOperator, typename ColorOperator>
     ColorOperator Image<ImageOperator, ColorOperator>::pixel(size_t x, size_t y) const {
         return image.pixel(x, y);

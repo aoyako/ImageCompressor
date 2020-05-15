@@ -28,6 +28,11 @@ namespace image {
         Image(const Image &img);
 
         /**
+         * Assignment operator
+         */
+        Image& operator=(const Image &img);
+
+        /**
          * Move Constructor
          */
         Image(Image &&img);

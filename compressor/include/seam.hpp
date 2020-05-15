@@ -26,7 +26,13 @@ namespace algorithm {
             for (int col = 1; col < img.height(); ++col) {
                 for (int row = 1; row < img.width()-1; ++row) {
                     size_t min = std::min(std::min(seam_image[(col-1)*img.width() + row-1], seam_image[(col-1)*img.width() + row]), seam_image[(col-1)*img.width() + row+1]);
-                    size_t addition = (img.pixel(row, col).red()+128 <= params.MIN_BORDER_COLOR) ? 0 : ((img.pixel(row, col).red()+128 <= params.MAX_BORDER_COLOR) ? params.MID_ADDITION : params.MAX_ADDITION);
+//                    size_t addition = (img.pixel(row, col).red()+128 <= params.MIN_BORDER_COLOR) ? 0 : ((img.pixel(row, col).red()+128 <= params.MAX_BORDER_COLOR) ? params.MID_ADDITION : params.MAX_ADDITION);
+                    double k_mid = params.MID_ADDITION/(params.MAX_BORDER_COLOR - params.MIN_BORDER_COLOR);
+                    double k_hight = params.MAX_ADDITION/(255 - params.MAX_BORDER_COLOR);
+
+                    size_t addition = (img.pixel(row, col).red()+128 <= params.MIN_BORDER_COLOR) ? 0 :
+                                      ((img.pixel(row, col).red()+128 <= params.MAX_BORDER_COLOR) ? k_mid*(img.pixel(row, col).red()+128)
+                                      : k_hight*(img.pixel(row, col).red()+128));
                     seam_image[col*img.width() + row] = min + img.pixel(row, col).red() + 128 + addition;
                 }
             }

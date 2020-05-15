@@ -35,7 +35,8 @@ namespace algorithm {
             image::Image<Img, Color> gray_img(img);
             for (int j = 0; j < gray_img.height(); ++j) {
                 for (int i = 0; i < gray_img.width(); ++i) {
-                    char color = 0.299*gray_img.pixel(i, j).red() + 0.587*gray_img.pixel(i, j).green() + 0.114*gray_img.pixel(i, j).blue();
+//                    char color = 0.299*gray_img.pixel(i, j).red() + 0.587*gray_img.pixel(i, j).green() + 0.114*gray_img.pixel(i, j).blue();
+                    char color = 0.33*gray_img.pixel(i, j).red() + 0.33*gray_img.pixel(i, j).green() + 0.34*gray_img.pixel(i, j).blue();
                     gray_img.setPixel(i, j, Color(color, color, color));
                 }
             }
@@ -46,19 +47,19 @@ namespace algorithm {
         static image::Image<Img, Color> NoiseRemove(const image::Image<Img, Color> &img, const Params &param) {
             image::Image<Img, Color> noise_img(img);
             
-            int n = 3;
-        //     int Gaussian[5][5] = {
-        //         {1, 4, 7, 4, 1},
-        //         {4, 16, 26, 16, 4},
-        //         {7, 26, 41, 26, 7},
-        //         {4, 16, 26, 16, 4},
-        //         {1, 4, 7, 4, 1},
-        //     };
-            int Gaussian[3][3] = {
-                {1, 2, 1},
-                {2, 4, 2},
-                {1, 2, 1},
-            };
+            int n = 5;
+             int Gaussian[5][5] = {
+                 {1, 4, 7, 4, 1},
+                 {4, 16, 26, 16, 4},
+                 {7, 26, 41, 26, 7},
+                 {4, 16, 26, 16, 4},
+                 {1, 4, 7, 4, 1},
+             };
+//            int Gaussian[3][3] = {
+//                {1, 2, 1},
+//                {2, 4, 2},
+//                {1, 2, 1},
+//            };
             int sum = 0;
             
             for (int j = n/2; j < noise_img.height()-n/2; ++j) {
@@ -85,14 +86,14 @@ namespace algorithm {
             
             int n = 3;
             int SobelX[3][3] = {
-                {1, 0, -1},
-                {2, 0, -2},
-                {1, 0, -1},
+                {3, 0, -3},
+                {10, 0, -10},
+                {3, 0, -3},
             };
             int SobelY[3][3] = {
-                {1, 2, 1},
+                {3, 10, 3},
                 {0, 0, 0},
-                {-1, -2, -1},
+                {-3, -10, -3},
             };
             
             struct info {

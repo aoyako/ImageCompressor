@@ -85,6 +85,18 @@ namespace image {
         data = img.data;
         img.data = nullptr;
     }
+
+    BMPImage& BMPImage::operator=(const BMPImage &img) {
+        if (data)
+            delete[] data;
+        img_width = img.img_width;
+        img_height = img.img_height;
+        data = new BMPColor [img_width*img_height];
+        std::copy(img.info, img.info+54, info);
+        std::copy(img.data, img.data+img_width*img_height, data);
+
+        return *this;
+    }
     
     BMPImage::~BMPImage() {
         if (data) {

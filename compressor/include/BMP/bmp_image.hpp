@@ -43,6 +43,11 @@ namespace image {
          * Move constructor
          */
         BMPImage(BMPImage &&img);
+
+        /**
+         * Assignment operator
+         */
+        BMPImage& operator=(const BMPImage &img);
         
         ~BMPImage();
         
