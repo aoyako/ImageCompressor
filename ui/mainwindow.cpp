@@ -8,6 +8,7 @@
 #include <iostream>
 #include <future>
 #include <thread>
+#include <sstream>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -40,6 +41,53 @@ MainWindow::MainWindow(QWidget *parent)
 
     saver.setAutosave(false);
     ui->checkBox->setDown(false);
+
+    // get all platforms (drivers)
+        std::vector<cl::Platform> all_platforms;
+        cl::Platform::get(&all_platforms);
+
+        if (all_platforms.size() == 0) {
+            std::cout<<" No platforms found. Check OpenCL installation!\n";
+            exit(1);
+        }
+        cl::Platform default_platform=all_platforms[1];
+
+        // get default device (CPUs, GPUs) of the default platform
+        std::vector<cl::Device> all_devices;
+        default_platform.getDevices(CL_DEVICE_TYPE_ALL, &all_devices);
+        if(all_devices.size() == 0){
+            std::cout<<" No devices found. Check OpenCL installation!\n";
+            exit(1);
+        }
+
+        // use device[1] because that's a GPU; device[0] is the CPU
+        cl::Device default_device=all_devices[0];
+        std::cout<< "Using device: "<<default_device.getInfo<CL_DEVICE_NAME>()<<"\n";
+        std::cout<<"memory: "<<default_device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>()*sizeof(cl_ulong)<<std::endl;
+        std::cout<<"groups: "<<default_device.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>()<<std::endl;
+
+        context = std::make_shared<cl::Context>(default_device);
+        cl::Program::Sources sources;
+
+        std::ifstream code("kernel.cl");
+        if (!code) {
+            std::cout<<"Cannot find \"kernel.cl\" file!"<<std::endl;
+        }
+        std::string kernel_code;
+        {
+            std::ostringstream ss;
+            ss << code.rdbuf();
+            kernel_code = ss.str();
+        }
+
+        sources.push_back({kernel_code.c_str(), kernel_code.length()});
+
+        program = std::make_shared<cl::Program>(*context, sources);
+        if (program->build({default_device}) != CL_SUCCESS) {
+            std::cout << "Error building: " << program->getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << std::endl;
+            exit(1);
+        }
+        queue = std::make_shared<cl::CommandQueue>(*context, default_device);
 }
 
 MainWindow::~MainWindow()
@@ -51,8 +99,9 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionOpen_triggered()
 {
     QString file_name = QFileDialog::getOpenFileName(this,
-        tr("Open Image"), "/home/aoyako/cpp/compressing/build", tr("Image Files (*.png *.jpg *.bmp)"));
+        tr("Open Image"), "/home/aoyako/cpp/compressing/build", tr("(*.png *.jpg *.bmp)"));
 
+//    QString file_name = "/home/aoyako/images/source3.jpg";
     if(!file_name.isEmpty()&& !file_name.isNull()){
         QImage source_image(file_name);
         image.setImage(source_image);
@@ -78,33 +127,9 @@ void MainWindow::on_checkBox_stateChanged(int arg1)
 void MainWindow::on_process_clicked()
 {
     image::Image<image::BMPImage, image::BMPColor> result = ImageWrapper(&image.image);
-//    algorithm::Params params(ui->low_color_border->value(),
-//                             ui->hight_color_border->value(),
-//                             ui->hight_color_addition->value(),
-//                             ui->low_color_addition->value());
-
-//    params.fat_lines = false;s
-//    auto mask = algorithm::Algorithm::SobelEdges(
-//                algorithm::Algorithm::NoiseRemove(
-//                algorithm::Algorithm::GrayLevel(image::Image<image::BMPImage, image::BMPColor>(ImageWrapper(&image.image)), params), params), params);
-//    mask = algorithm::Algorithm::DoubleTreshold(mask, algorithm::Params(30, 40, 0, 0));
-//    mask.save("/home/aoyako/images/MASK.BMP");
 
     size_t new_width = ui->new_width->value();
     size_t new_height = ui->new_height->value();
-//    std::cout<<new_width<<" "<<new_height<<std::endl;
-
-//    size_t seam_limit = 50;
-//    if ((image.image.width()-new_width >= seam_limit) || (image.image.height()-new_height >= seam_limit)) {
-//    algorithm::Seamer::resizeBMPImage(result,
-//                                      seam_limit, (image.image.width()-new_width) / seam_limit,
-//                                      seam_limit, (image.image.height()-new_height) / seam_limit, mask, params);
-//    }
-
-//    algorithm::Seamer::resizeBMPImage(result,
-//                                      (image.image.width()-new_width) % seam_limit, 1,
-//                                      (image.image.height()-new_height) % seam_limit, 1, mask, params);
-
 
     algorithm::Params params(30, 120, 500, 100000000);
     auto mask = algorithm::Algorithm::SobelEdges(
@@ -112,8 +137,8 @@ void MainWindow::on_process_clicked()
 
 
     auto handle = std::async(std::launch::async, algorithm::Seamer::resizeBMPImage, std::ref(result),
-                             1, (image.image.width()-new_width),
-                             1, (image.image.height()-new_height), std::ref(mask), std::cref(params));
+                             (image.image.width()-new_width),
+                             (image.image.height()-new_height), std::ref(mask), std::cref(params), queue, context, program);
 //    std::async(algorithm::Seamer::resizeBMPImage, std::ref(result),
 //                                              1,  (image.image.width()-new_width),
 //                                              1, (image.image.height()-new_height), std::move(mask), params);

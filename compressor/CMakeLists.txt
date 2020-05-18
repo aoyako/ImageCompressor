@@ -1,3 +1,5 @@
+find_package(OpenCL 2.2 REQUIRED)
+
 set(HEADER_FILES
     include/image_algorithms.hpp
     include/seam.hpp
@@ -14,12 +16,16 @@ set(SOURCE_FILES
     
     src/BMP/bmp_color.cpp
     src/BMP/bmp_image.cpp
+
+    kernel.cl
 )
 
 add_library(libCompressor
     ${HEADER_FILES}
     ${SOURCE_FILES}
 )
+
+target_link_libraries(libCompressor OpenCL::OpenCL)
 
 target_include_directories(libCompressor
     PUBLIC    

@@ -94,27 +94,27 @@ namespace image {
          * @param line vector of erased points. Used one-line coord system (i.e. (x, y) -> x*width + y)
          */ 
         void updateSide(size_t new_value, DIRECTION direction, std::vector<size_t> &line);
+
+        /**
+         * Pixed data
+         */
+        BMPColor *data = nullptr;
+
+        /**
+         * Image's width
+         */
+        size_t img_width = 0;
+
+        /**
+         * Image's height
+         */
+        size_t img_height = 0;
     private:
         
         /**
          * Metadata of BMP image
          */ 
         char info[54];
-        
-        /**
-         * Pixed data
-         */ 
-        BMPColor *data = nullptr;
-        
-        /**
-         * Image's width
-         */ 
-        size_t img_width = 0;
-        
-        /**
-         * Image's height
-         */ 
-        size_t img_height = 0;
     };
 
 }

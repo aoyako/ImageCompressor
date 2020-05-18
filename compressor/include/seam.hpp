@@ -5,15 +5,25 @@
 #include <BMP/bmp_image.hpp>
 #include <image_algorithms.hpp>
 #include <iostream>
+#include <memory>
+
+#ifdef __APPLE__
+    #include <OpenCL/cl.hpp>
+#else
+    #include <CL/cl.hpp>
+#endif
 
 namespace algorithm {
     
     class Seamer {
         public:
         static void resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &img,
-                                   size_t cut_width, size_t width_iterations,
-                                   size_t cut_height, size_t height_iterations,
-                                   image::Image<image::BMPImage, image::BMPColor> &mask, const Params &param);
+                                   size_t cut_width,
+                                   size_t cut_height,
+                                   image::Image<image::BMPImage, image::BMPColor> &mask, const Params &param, std::shared_ptr<cl::CommandQueue> queue,
+                                   std::shared_ptr<cl::Context> context,
+                                   std::shared_ptr<cl::Program> program
+                                  );
 
         template<typename Img, typename Color>
         static std::vector<size_t> createVerticalSeams(const image::Image<Img, Color> &img, int N, size_t *seam_image, const Params &params) {
@@ -26,7 +36,6 @@ namespace algorithm {
             for (int col = 1; col < img.height(); ++col) {
                 for (int row = 1; row < img.width()-1; ++row) {
                     size_t min = std::min(std::min(seam_image[(col-1)*img.width() + row-1], seam_image[(col-1)*img.width() + row]), seam_image[(col-1)*img.width() + row+1]);
-//                    size_t addition = (img.pixel(row, col).red()+128 <= params.MIN_BORDER_COLOR) ? 0 : ((img.pixel(row, col).red()+128 <= params.MAX_BORDER_COLOR) ? params.MID_ADDITION : params.MAX_ADDITION);
                     double k_mid = params.MID_ADDITION/(params.MAX_BORDER_COLOR - params.MIN_BORDER_COLOR);
                     double k_hight = params.MAX_ADDITION/(255 - params.MAX_BORDER_COLOR);
 
