@@ -8,6 +8,7 @@
 #include <iostream>
 #include <future>
 #include <thread>
+#include <unistd.h>
 #include <sstream>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -50,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
             std::cout<<" No platforms found. Check OpenCL installation!\n";
             exit(1);
         }
-        cl::Platform default_platform=all_platforms[1];
+        cl::Platform default_platform=all_platforms[0];
 
         // get default device (CPUs, GPUs) of the default platform
         std::vector<cl::Device> all_devices;
@@ -142,6 +143,7 @@ void MainWindow::on_process_clicked()
 //    std::async(algorithm::Seamer::resizeBMPImage, std::ref(result),
 //                                              1,  (image.image.width()-new_width),
 //                                              1, (image.image.height()-new_height), std::move(mask), params);
+    usleep(60000000);
     handle.get();
     image.setImage(ImageWrapper(&result.getImage()));
     saver.save(image.image);
