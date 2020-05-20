@@ -19,8 +19,7 @@ namespace algorithm {
         public:
         static void resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &img,
                                    size_t cut_width,
-                                   size_t cut_height,
-                                   image::Image<image::BMPImage, image::BMPColor> &mask, const Params &param, std::shared_ptr<cl::CommandQueue> queue,
+                                   size_t cut_height, std::shared_ptr<cl::CommandQueue> queue,
                                    std::shared_ptr<cl::Context> context,
                                    std::shared_ptr<cl::Program> program
                                   );

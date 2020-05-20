@@ -51,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
             std::cout<<" No platforms found. Check OpenCL installation!\n";
             exit(1);
         }
-        cl::Platform default_platform=all_platforms[0];
+        cl::Platform default_platform=all_platforms[1];
 
         // get default device (CPUs, GPUs) of the default platform
         std::vector<cl::Device> all_devices;
@@ -132,18 +132,10 @@ void MainWindow::on_process_clicked()
     size_t new_width = ui->new_width->value();
     size_t new_height = ui->new_height->value();
 
-    algorithm::Params params(30, 120, 500, 100000000);
-    auto mask = algorithm::Algorithm::SobelEdges(
-                algorithm::Algorithm::GrayLevel(result, params), params);
-
-
     auto handle = std::async(std::launch::async, algorithm::Seamer::resizeBMPImage, std::ref(result),
                              (image.image.width()-new_width),
-                             (image.image.height()-new_height), std::ref(mask), std::cref(params), queue, context, program);
-//    std::async(algorithm::Seamer::resizeBMPImage, std::ref(result),
-//                                              1,  (image.image.width()-new_width),
-//                                              1, (image.image.height()-new_height), std::move(mask), params);
-    usleep(60000000);
+                             (image.image.height()-new_height), queue, context, program);
+
     handle.get();
     image.setImage(ImageWrapper(&result.getImage()));
     saver.save(image.image);

@@ -1,7 +1,7 @@
 // #pragma OPENCL EXTENSION cl_amd_printf : enable
 // #pragma OPENCL EXTENSION cl_intel_printf : enable
 
-void kernel verticalSeam(global float *input,
+void kernel verticalSeam(const global float *input,
                 int rows,
                 int cols,
                 int default_cols,
@@ -71,7 +71,7 @@ void kernel verticalSeam(global float *input,
        }
 }
 
-void kernel horisontalSeam(global float *input,
+void kernel horisontalSeam(const global float *input,
                 int rows,
                 int cols,
                 int default_cols,
@@ -147,7 +147,7 @@ void kernel removeVerticalSeam(global float *mask,
                 int rows,
                 int cols,
                 int default_cols,
-                 global size_t *seam_points
+                const global size_t *seam_points
                 )
 {
     int id = get_local_id(0);
@@ -182,7 +182,7 @@ void kernel removeHorisontalSeam(global float *mask,
                 int rows,
                 int cols,
                 int default_cols,
-                 global size_t *seam_points
+                const global size_t *seam_points
                 )
 {
     int id = get_local_id(0);
@@ -210,4 +210,91 @@ void kernel removeHorisontalSeam(global float *mask,
 
         barrier(CLK_LOCAL_MEM_FENCE);
     }
+}
+
+void kernel grayLevel(const global float *image,
+                global float *result,
+                int rows,
+                int cols,
+                int default_cols,
+                local float *matrix
+                )
+{
+    int g_id_x = get_global_id(0);
+    int g_id_y = get_global_id(1);
+    if ((g_id_x < cols) && (g_id_y < rows)) {
+        size_t rgb_color = image[g_id_y*default_cols + g_id_x];
+        float red = rgb_color / (256 * 256);
+        float green = (rgb_color / 256) % 256;
+        float blue = rgb_color % 256;
+        float color = 0.33*red + 0.33*green + 0.34*blue;
+        result[g_id_y*default_cols + g_id_x] = color;
+}
+}
+
+void kernel sobelOperator(const global float *image,
+                global float *result,
+                int rows,
+                int cols,
+                int default_cols,
+                local float *matrix
+                )
+{
+    int g_id_x = get_global_id(0);
+    int g_id_y = get_global_id(1);
+    if ((g_id_x < cols) && (g_id_y < rows)) {
+    int n = 3;
+//    float Gaussian[3][3] = {
+//           {1, 2, 1},
+//           {2, 4, 2},
+//           {1, 2, 1},
+//    };
+//    const int gaus_sum = 16;
+//    float line = 0;
+//    if ((g_id_x != 0) && (g_id_y != 0) && (g_id_x != cols-1) && (g_id_y != rows-1)) {
+//        for (int x = -n/2; x < n/2; ++x) {
+//            for (int y = -n/2; y < n/2; ++y) {
+//                line += Gaussian[n/2+x][n/2+y] * temp[(g_id_y+y)*default_cols + g_id_x+x];
+//            }
+//        }
+//    }
+//    result[g_id_y*default_cols + g_id_x] = line / gaus_sum;
+//    barrier(CLK_LOCAL_MEM_FENCE);
+
+    const float SobelX[3][3] = {
+        {1, 0, -1},
+        {2, 0, -2},
+        {1, 0, -1},
+    };
+    const float SobelY[3][3] = {
+        {1, 2, 1},
+        {0, 0, 0},
+        {-1, -2, -1},
+    };
+
+    if ((g_id_x != 0) && (g_id_y != 0) && (g_id_x != cols-1) && (g_id_y != rows-1)) {
+        const float ImageClone[3][3] = {
+            {image[(g_id_y+1)*default_cols + g_id_x-1], image[(g_id_y+1)*default_cols + g_id_x], image[(g_id_y+1)*default_cols + g_id_x+1]},
+            {image[(g_id_y)*default_cols + g_id_x-1], image[(g_id_y)*default_cols + g_id_x], image[(g_id_y)*default_cols + g_id_x+1]},
+            {image[(g_id_y-1)*default_cols + g_id_x-1], image[(g_id_y-1)*default_cols + g_id_x], image[(g_id_y-1)*default_cols + g_id_x+1]},
+        };
+        float gx = 0;
+        float gy = 0;
+        for (int x = -n/2; x <= n/2; ++x) {
+            for (int y = -n/2; y <= n/2; ++y) {
+//                gy += image[(g_id_y+x)*default_cols + g_id_x+y] * SobelY[n/2+y][n/2+x];
+//                gx += image[(g_id_y+x)*default_cols + g_id_x+y] * SobelX[n/2+y][n/2+x];
+                gy += ImageClone[n/2+x][n/2+y] * SobelY[n/2+y][n/2+x];
+                gx += ImageClone[n/2+x][n/2+y] * SobelX[n/2+y][n/2+x];
+            }
+        }
+//        printf("%d\n", ((size_t) sqrt(gx*gx + gy*gy)));
+        gy = 255*gy/1020;
+        gx = 255*gx/1020;
+        int temp = sqrt(gx*gx + gy*gy)/sqrt(2.0);
+        result[g_id_y*default_cols + g_id_x] = temp;
+    } else {
+        result[g_id_y*default_cols + g_id_x] = 0;
+    }
+}
 }
