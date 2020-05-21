@@ -13,15 +13,24 @@
     #include <CL/cl.hpp>
 #endif
 
+namespace device {
+    struct Params {
+        std::shared_ptr<cl::CommandQueue> queue;
+        std::shared_ptr<cl::Device> device;
+        std::shared_ptr<cl::Context> context;
+        std::shared_ptr<cl::Program> program;
+        std::shared_ptr<cl::Platform> platform;
+    };
+}
+
 namespace algorithm {
     
     class Seamer {
         public:
         static void resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &img,
                                    size_t cut_width,
-                                   size_t cut_height, std::shared_ptr<cl::CommandQueue> queue,
-                                   std::shared_ptr<cl::Context> context,
-                                   std::shared_ptr<cl::Program> program
+                                   size_t cut_height,
+                                   const device::Params &params
                                   );
 
         template<typename Img, typename Color>

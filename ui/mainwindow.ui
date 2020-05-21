@@ -122,10 +122,10 @@
            <string>Process</string>
           </property>
          </widget>
-         <widget class="QCheckBox" name="checkBox">
+         <widget class="QCheckBox" name="autosave">
           <property name="geometry">
            <rect>
-            <x>550</x>
+            <x>20</x>
             <y>40</y>
             <width>92</width>
             <height>25</height>
@@ -135,96 +135,17 @@
            <string>Autosave</string>
           </property>
          </widget>
-         <widget class="QSpinBox" name="hight_color_border">
-          <property name="geometry">
-           <rect>
-            <x>150</x>
-            <y>30</y>
-            <width>81</width>
-            <height>30</height>
-           </rect>
-          </property>
-         </widget>
-         <widget class="QSpinBox" name="low_color_border">
-          <property name="geometry">
-           <rect>
-            <x>150</x>
-            <y>80</y>
-            <width>81</width>
-            <height>28</height>
-           </rect>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_7">
+         <widget class="QCheckBox" name="usegpu">
           <property name="geometry">
            <rect>
             <x>20</x>
-            <y>40</y>
-            <width>131</width>
-            <height>19</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Hight color border</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_8">
-          <property name="geometry">
-           <rect>
-            <x>20</x>
-            <y>90</y>
-            <width>131</width>
-            <height>19</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Low color border</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_11">
-          <property name="geometry">
-           <rect>
-            <x>270</x>
-            <y>40</y>
-            <width>131</width>
-            <height>19</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Hight color addition</string>
-          </property>
-         </widget>
-         <widget class="QSpinBox" name="hight_color_addition">
-          <property name="geometry">
-           <rect>
-            <x>410</x>
-            <y>30</y>
-            <width>81</width>
-            <height>30</height>
-           </rect>
-          </property>
-         </widget>
-         <widget class="QLabel" name="label_12">
-          <property name="geometry">
-           <rect>
-            <x>270</x>
-            <y>90</y>
-            <width>131</width>
-            <height>19</height>
-           </rect>
-          </property>
-          <property name="text">
-           <string>Low color addition</string>
-          </property>
-         </widget>
-         <widget class="QSpinBox" name="low_color_addition">
-          <property name="geometry">
-           <rect>
-            <x>410</x>
             <y>80</y>
-            <width>81</width>
-            <height>28</height>
+            <width>92</width>
+            <height>25</height>
            </rect>
+          </property>
+          <property name="text">
+           <string>Use GPU</string>
           </property>
          </widget>
         </widget>

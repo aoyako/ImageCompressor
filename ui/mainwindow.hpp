@@ -6,6 +6,7 @@
 
 #include <image_container.hpp>
 #include <saver.hpp>
+#include <seam.hpp>
 
 #ifdef __APPLE__
     #include <OpenCL/cl.hpp>
@@ -32,12 +33,14 @@ private slots:
 
     void on_process_clicked();
 
+    void on_usegpu_stateChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     ImageSaver saver;
     ImageContainer image;
-    std::shared_ptr<cl::CommandQueue> queue;
-    std::shared_ptr<cl::Context> context;
-    std::shared_ptr<cl::Program> program;
+    void initDevices(const cl::Platform &platform);
+    std::vector<device::Params> devices;
+    size_t device_option = 0;
 };
 #endif // MAINWINDOW_HPP
