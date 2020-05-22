@@ -12,7 +12,8 @@ Image resizing applicationg based on Seam carving algorithm
   - OpenCl 2.2
 
 ### Examples
-![](Examples/source1.jpg?raw=true | width=120) ![](Examples/result1.png?raw=true | width=120)
+<img src="Examples/source1.jpg" width="100" style="float:left;">
+<img src="Examples/result1.png" width="100" style="float:right;">
 > From 1400 px wide to 1000 px
 
 ![](Examples/source4.jpg?raw=true | width=120) ![](Examples/result4.png?raw=true | width=120)
