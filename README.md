@@ -13,10 +13,14 @@ Image resizing applicationg based on Seam carving algorithm
 
 ### Examples
 
-<!-- ![](Examples/source1.jpg){:width="300px"} ![](Examples/result1.png){:width="300px"} -->
-<img src="Examples/source1.jpg" width="300px" style="display:inline-block;">
-<img src="Examples/result1.png" width="300px" style="display:inline-block;">
+<p float="left">
+  <img src="Examples/source1.jpg" height="300px">
+  <img src="Examples/result1.png" height="300px">
+</p>
 > From 1400 px wide to 1000 px
 
-![](Examples/source4.jpg?raw=true | width=120) ![](Examples/result4.png?raw=true | width=120)
+<p float="left">
+  <img src="Examples/source4.jpg" height="300px">
+  <img src="Examples/result4.png" height="300px">
+</p>
 > From 2000 px wide to 1000 px
