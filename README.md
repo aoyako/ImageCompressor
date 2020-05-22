@@ -12,7 +12,7 @@ Image resizing applicationg based on Seam carving algorithm
   - OpenCl 2.2
 
 ### Examples
-![](https://github.com/aoyako/ImageCompressor/Examples/source1.jpg) ![](https://github.com/aoyako/ImageCompressor/Examples/result1.png)
+![](Examples/source1.jpg?raw=true) ![](Examples/result1.png?raw=true)
 > From 1400 px wide to 1000 px
 
 ![](https://imgur.com/glhPr7T) ![](https://imgur.com/SBMbdO5)
