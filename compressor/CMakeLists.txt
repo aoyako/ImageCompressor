@@ -1,7 +1,6 @@
 find_package(OpenCL 2.2 REQUIRED)
 
 set(HEADER_FILES
-    include/image_algorithms.hpp
     include/seam.hpp
     include/image.hpp
     
@@ -10,7 +9,6 @@ set(HEADER_FILES
 )
 
 set(SOURCE_FILES
-    src/image_algorithms.cpp
     src/image.tpp
     src/seam.cpp
     

@@ -2,9 +2,9 @@
 
 #include <saver.hpp>
 
-void ImageSaver::setAutosave(bool value)
+void ImageSaver::setAutosave(bool state)
 {
-    autosave = value;
+    autosave = state;
 }
 
 void ImageSaver::save(const QImage &image)
@@ -15,6 +15,9 @@ void ImageSaver::save(const QImage &image)
         QString file_name = QFileDialog::getSaveFileName(nullptr,
             QObject::tr("Save Result Image"), "/home/aoyako/images",
             QObject::tr("Images (*.png *.jpg, *bmp, *jpeg)"));
-        image.save(file_name);
+
+        if (!file_name.isEmpty() && !file_name.isNull()) {
+            image.save(file_name);
+        }
     }
 }

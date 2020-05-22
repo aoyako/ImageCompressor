@@ -1,14 +1,22 @@
-// #pragma OPENCL EXTENSION cl_amd_printf : enable
-// #pragma OPENCL EXTENSION cl_intel_printf : enable
-
+/**
+  * @brief Finds vertical seam with minimum cost
+  * @param input Image of energy levels
+  * @param rows Width of image
+  * @param cols Height of image
+  * @param default_cols Width of buffered image (power of two)
+  * @param current_cost Array for storing seam costs of processed image row
+  * @param previous_cost Array for storing seam costs of already calculated image row
+  * @param directiosn Matrix is used to restore path from end to begining
+  * @param seam_points Array of seam column indexes, from end to begining
+  */
 void kernel verticalSeam(const global float *input,
                 int rows,
                 int cols,
                 int default_cols,
-                 local float *current_cost,
-                 local float *previous_cost,
-                 global int *directions,
-                 global size_t *seam_points
+                local float *current_cost,
+                local float *previous_cost,
+                global int *directions,
+                global size_t *seam_points
                 )
 {
        int id = get_local_id(0);
@@ -71,14 +79,25 @@ void kernel verticalSeam(const global float *input,
        }
 }
 
+/**
+  * @brief Finds horisontal seam with minimum cost
+  * @param input Image of energy levels
+  * @param rows Width of image
+  * @param cols Height of image
+  * @param default_cols Width of buffered image (power of two)
+  * @param current_cost Array for storing seam costs of processed image row
+  * @param previous_cost Array for storing seam costs of already calculated image row
+  * @param directiosn Matrix is used to restore path from end to begining
+  * @param seam_points Array of seam row indexes, from end to begining
+  */
 void kernel horisontalSeam(const global float *input,
                 int rows,
                 int cols,
                 int default_cols,
-                 local float *current_cost,
-                 local float *previous_cost,
-                 global int *directions,
-                 global size_t *seam_points
+                local float *current_cost,
+                local float *previous_cost,
+                global int *directions,
+                global size_t *seam_points
                 )
 {
        int id = get_local_id(0);
@@ -141,7 +160,15 @@ void kernel horisontalSeam(const global float *input,
        }
 }
 
-
+/**
+  * @brief Removes vertical seam from images
+  * @param mask First image
+  * @param image Second image
+  * @param rows Width of image
+  * @param cols Height of image
+  * @param default_cols Width of buffered image (power of two)
+  * @param seam_points Array of seam column indexes, from end to begining
+  */
 void kernel removeVerticalSeam(global float *mask,
                 global float *image,
                 int rows,
@@ -177,6 +204,15 @@ void kernel removeVerticalSeam(global float *mask,
     }
 }
 
+/**
+  * @brief Removes horisontal seam from images
+  * @param mask First image
+  * @param image Second image
+  * @param rows Width of image
+  * @param cols Height of image
+  * @param default_cols Width of buffered image (power of two)
+  * @param seam_points Array of seam row indexes, from end to begining
+  */
 void kernel removeHorisontalSeam(global float *mask,
                 global float *image,
                 int rows,
@@ -212,12 +248,19 @@ void kernel removeHorisontalSeam(global float *mask,
     }
 }
 
+/**
+  * @brief Applies gray filter to image
+  * @param image Processed image
+  * @param result Gray colored image
+  * @param rows Width of image
+  * @param cols Height of image
+  * @param default_cols Width of buffered image (power of two)
+  */
 void kernel grayLevel(const global float *image,
                 global float *result,
                 int rows,
                 int cols,
                 int default_cols,
-                local float *matrix
                 )
 {
     int g_id_x = get_global_id(0);
@@ -229,72 +272,61 @@ void kernel grayLevel(const global float *image,
         float blue = rgb_color % 256;
         float color = 0.33*red + 0.33*green + 0.34*blue;
         result[g_id_y*default_cols + g_id_x] = color;
-}
+    }
 }
 
+/**
+  * @brief Applies Sobel operator to image
+  * @param image Processed image
+  * @param result Image with hightlighted borders
+  * @param rows Width of image
+  * @param cols Height of image
+  * @param default_cols Width of buffered image (power of two)
+  */
 void kernel sobelOperator(const global float *image,
                 global float *result,
                 int rows,
                 int cols,
                 int default_cols,
-                local float *matrix
                 )
 {
     int g_id_x = get_global_id(0);
     int g_id_y = get_global_id(1);
     if ((g_id_x < cols) && (g_id_y < rows)) {
-    int n = 3;
-//    float Gaussian[3][3] = {
-//           {1, 2, 1},
-//           {2, 4, 2},
-//           {1, 2, 1},
-//    };
-//    const int gaus_sum = 16;
-//    float line = 0;
-//    if ((g_id_x != 0) && (g_id_y != 0) && (g_id_x != cols-1) && (g_id_y != rows-1)) {
-//        for (int x = -n/2; x < n/2; ++x) {
-//            for (int y = -n/2; y < n/2; ++y) {
-//                line += Gaussian[n/2+x][n/2+y] * temp[(g_id_y+y)*default_cols + g_id_x+x];
-//            }
-//        }
-//    }
-//    result[g_id_y*default_cols + g_id_x] = line / gaus_sum;
-//    barrier(CLK_LOCAL_MEM_FENCE);
+        int n = 3;
 
-    const float SobelX[3][3] = {
-        {1, 0, -1},
-        {2, 0, -2},
-        {1, 0, -1},
-    };
-    const float SobelY[3][3] = {
-        {1, 2, 1},
-        {0, 0, 0},
-        {-1, -2, -1},
-    };
-
-    if ((g_id_x != 0) && (g_id_y != 0) && (g_id_x != cols-1) && (g_id_y != rows-1)) {
-        const float ImageClone[3][3] = {
-            {image[(g_id_y+1)*default_cols + g_id_x-1], image[(g_id_y+1)*default_cols + g_id_x], image[(g_id_y+1)*default_cols + g_id_x+1]},
-            {image[(g_id_y)*default_cols + g_id_x-1], image[(g_id_y)*default_cols + g_id_x], image[(g_id_y)*default_cols + g_id_x+1]},
-            {image[(g_id_y-1)*default_cols + g_id_x-1], image[(g_id_y-1)*default_cols + g_id_x], image[(g_id_y-1)*default_cols + g_id_x+1]},
+        const float SobelX[3][3] = {
+            {1, 0, -1},
+            {2, 0, -2},
+            {1, 0, -1},
         };
-        float gx = 0;
-        float gy = 0;
-        for (int x = -n/2; x <= n/2; ++x) {
-            for (int y = -n/2; y <= n/2; ++y) {
-//                gy += image[(g_id_y+x)*default_cols + g_id_x+y] * SobelY[n/2+y][n/2+x];
-//                gx += image[(g_id_y+x)*default_cols + g_id_x+y] * SobelX[n/2+y][n/2+x];
-                gy += ImageClone[n/2+x][n/2+y] * SobelY[n/2+y][n/2+x];
-                gx += ImageClone[n/2+x][n/2+y] * SobelX[n/2+y][n/2+x];
+        const float SobelY[3][3] = {
+            {1, 2, 1},
+            {0, 0, 0},
+            {-1, -2, -1},
+        };
+
+        if ((g_id_x != 0) && (g_id_y != 0) && (g_id_x != cols-1) && (g_id_y != rows-1)) {
+            const float ImageClone[3][3] = {
+                {image[(g_id_y+1)*default_cols + g_id_x-1], image[(g_id_y+1)*default_cols + g_id_x], image[(g_id_y+1)*default_cols + g_id_x+1]},
+                {image[(g_id_y)*default_cols + g_id_x-1], image[(g_id_y)*default_cols + g_id_x], image[(g_id_y)*default_cols + g_id_x+1]},
+                {image[(g_id_y-1)*default_cols + g_id_x-1], image[(g_id_y-1)*default_cols + g_id_x], image[(g_id_y-1)*default_cols + g_id_x+1]},
+            };
+            float gx = 0;
+            float gy = 0;
+            for (int x = -n/2; x <= n/2; ++x) {
+                for (int y = -n/2; y <= n/2; ++y) {
+                    gy += ImageClone[n/2+x][n/2+y] * SobelY[n/2+y][n/2+x];
+                    gx += ImageClone[n/2+x][n/2+y] * SobelX[n/2+y][n/2+x];
+                }
             }
+
+            gy = 255*gy/1020;
+            gx = 255*gx/1020;
+            int temp = sqrt(gx*gx + gy*gy)/sqrt(2.0);
+            result[g_id_y*default_cols + g_id_x] = temp;
+        } else {
+            result[g_id_y*default_cols + g_id_x] = 0;
         }
-//        printf("%d\n", ((size_t) sqrt(gx*gx + gy*gy)));
-        gy = 255*gy/1020;
-        gx = 255*gx/1020;
-        int temp = sqrt(gx*gx + gy*gy)/sqrt(2.0);
-        result[g_id_y*default_cols + g_id_x] = temp;
-    } else {
-        result[g_id_y*default_cols + g_id_x] = 0;
     }
-}
 }

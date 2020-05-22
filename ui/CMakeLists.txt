@@ -18,10 +18,12 @@ set(SOURCE_FILES
   include/image_adapter.hpp
   include/image_container.hpp
   include/saver.hpp
+  include/execution.hpp
 
   src/image_adapter.cpp
   src/image_container.cpp
   src/saver.cpp
+  src/execution.cpp
 )
 
 add_executable(ImageCompressor ${SOURCE_FILES})

@@ -11,13 +11,13 @@
 
 namespace image {
     /**
-     * BMPImage class stores metadata and pixel map of image
+     * @brief BMPImage class stores metadata and pixel map of image
      */
     class BMPImage
     {
     public:
         /**
-         * Describes how pixel will be joined
+         * @brief Describes how pixel will be joined
          */
         enum DIRECTION {
             HORISONTAL,
@@ -25,94 +25,85 @@ namespace image {
         };
 
         /**
-         * Constructor from pieces
+         * @brief Constructor from pieces
          */
         BMPImage(size_t width, size_t height, BMPColor *data);
         
         /**
-         * Constructor from bmp file
+         * @brief Constructor from bmp file
          */
         BMPImage(std::string filename);
         
-        /**
-         * Copy constructor
-         */
         BMPImage(const BMPImage &img);
         
-        /**
-         * Move constructor
-         */
         BMPImage(BMPImage &&img);
 
-        /**
-         * Assignment operator
-         */
         BMPImage& operator=(const BMPImage &img);
         
         ~BMPImage();
         
         /**
-         * Returns color of pixel
+         * @brief Returns color of pixel
          */
         BMPColor pixel(int x, int y) const;
         
         /**
-         * Sets color of pixel
+         * @brief Sets color of pixel
          */
         void setPixel(int x, int y, BMPColor color);
         
         /**
-         * Saves image in BMP format
+         * @brief Saves image in BMP format
          */
         void save(std::string filename) const;
         
         /**
-         * Returns width of image
+         * @brief Returns width of image
          */
         size_t width() const;
         
         /**
-         * Returns height of image
+         * @brief Returns height of image
          */
         size_t height() const;
         
         /**
-         * Erases horisontal pixels
+         * @brief Erases horisontal pixels
          * @param line vector of erased points. Used one-line coord system (i.e. (x, y) -> x*width + y)
          */ 
         void removeHorisontalPoints(std::vector<size_t> &line);
         
         /**
-         * Erases vertical pixels
+         * @brief Erases vertical pixels
          * @param line vector of erased points. Used one-line coord system (i.e. (x, y) -> x*width + y)
          */ 
         void removeVertiacallPoints(std::vector<size_t> &line);
         
         /**
-         * Erases pixels from image
+         * @brief Erases pixels from image
          * @param DIRECTION specifies which remove function will be used
          * @param line vector of erased points. Used one-line coord system (i.e. (x, y) -> x*width + y)
          */ 
         void updateSide(size_t new_value, DIRECTION direction, std::vector<size_t> &line);
 
         /**
-         * Pixed data
+         * @brief Pixed data
          */
         BMPColor *data = nullptr;
 
         /**
-         * Image's width
+         * @brief Image's width
          */
         size_t img_width = 0;
 
         /**
-         * Image's height
+         * @brief Image's height
          */
         size_t img_height = 0;
     private:
         
         /**
-         * Metadata of BMP image
+         * @brief Metadata of BMP image
          */ 
         char info[54];
     };

@@ -7,9 +7,10 @@ namespace image {
 
     BMPImage::BMPImage(size_t width, size_t height, BMPColor *data) {
         /// Default metadata
-        memcpy(info, "\x42\x4d\x16\x47\x3f\x00\x00\x00\x00\x00\x36\x00\x00\x00\x28\x00\x00\x00\xac\x01\x00\x00\xce\x02\x00\x00\x01\x00\x18\x00\x00\x00\x00\x00\xe0\x46\x3f\x00\xe9\x24\x00\x00\xe9\x24\x00\x00\x00\x00\x00\x00\x00\x00", 54);
-//        auto temp = BMPImage("MAIN.BMP");
-//        memcpy(info, temp.info, 54);
+        memcpy(info, "\x42\x4d\x16\x47\x3f\x00\x00\x00\x00\x00\x36\x00\x00\x00\x28"
+                     "\x00\x00\x00\xac\x01\x00\x00\xce\x02\x00\x00\x01\x00\x18\x00"
+                     "\x00\x00\x00\x00\xe0\x46\x3f\x00\xe9\x24\x00\x00\xe9\x24\x00"
+                     "\x00\x00\x00\x00\x00\x00\x00", 54);
         img_width = width;
         img_height = height;
         this->data = data;
@@ -165,13 +166,6 @@ namespace image {
     }
     
     void BMPImage::removeHorisontalPoints(std::vector<size_t> &line) {
-        /// ******
-//        auto temp = BMPImage(*this);
-//        for (auto item : line) {
-//            temp.setPixel(item%temp.width(), item/temp.width(), BMPColor(255, 0, 0));
-//        }
-//        temp.save("SEAM.BMP");
-        /// ******
         if (line.empty()) {
             return;
         }
@@ -193,13 +187,7 @@ namespace image {
         if (line.empty()) {
             return;
         }
-//        /// ******
-//        auto temp = BMPImage(*this);
-//        for (auto item : line) {
-//            temp.setPixel(item%temp.width(), item/temp.width(), BMPColor(255, 0, 0));
-//        }
-//        temp.save("SEAM.BMP");
-//        /// ******
+
         size_t index = 0;
          for (size_t col = 0; col < width(); ++col) {
             size_t index = 0;

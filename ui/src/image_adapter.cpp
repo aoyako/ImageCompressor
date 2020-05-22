@@ -19,7 +19,6 @@ ImageWrapper::operator image::Image<image::BMPImage, image::BMPColor>() const
         for (int y = 0; y < qimage->height(); ++y) {
             QColor pixel = qimage->pixel(x, y);
             data[(qimage->height()-y-1)*qimage->width() + x] = image::BMPColor(pixel.red(), pixel.green(), pixel.blue());
-//            data[y + x*qimage->height()] = image::BMPColor(255, 0, 0);
         }
     }
     return image::BMPImage(qimage->width(), qimage->height(), data);

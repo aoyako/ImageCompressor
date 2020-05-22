@@ -3,16 +3,17 @@
 
 #include <QMainWindow>
 #include <memory>
-
-#include <image_container.hpp>
-#include <saver.hpp>
-#include <seam.hpp>
-
 #ifdef __APPLE__
     #include <OpenCL/cl.hpp>
 #else
     #include <CL/cl.hpp>
 #endif
+
+#include <image_container.hpp>
+#include <saver.hpp>
+#include <seam.hpp>
+#include <execution.hpp>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -27,20 +28,42 @@ public:
     ~MainWindow();
 
 private slots:
+    /**
+     * @brief Loads an image
+     */
     void on_actionOpen_triggered();
 
-    void on_checkBox_stateChanged(int arg1);
-
+    /**
+     * @brief Stars image processing
+     */
     void on_process_clicked();
 
-    void on_usegpu_stateChanged(int arg1);
+    /**
+     * @brief Changes code execution hardware
+     */
+    void on_usegpu_stateChanged(int value);
+
+    /**
+     * @brief Changes "autosave" flag
+     */
+    void on_autosave_stateChanged(int value);
 
 private:
     Ui::MainWindow *ui;
+
+    /**
+     * @brief Saver saves image depending on parameters
+     */
     ImageSaver saver;
+
+    /**
+     * @brief ImageContainer makes image backups
+     */
     ImageContainer image;
-    void initDevices(const cl::Platform &platform);
-    std::vector<device::Params> devices;
-    size_t device_option = 0;
+
+    /**
+     * @brief Changes processing device
+     */
+    Execution exec;
 };
 #endif // MAINWINDOW_HPP
