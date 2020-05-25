@@ -260,7 +260,7 @@ void kernel grayLevel(const global float *image,
                 global float *result,
                 int rows,
                 int cols,
-                int default_cols,
+                int default_cols
                 )
 {
     int g_id_x = get_global_id(0);
@@ -287,7 +287,7 @@ void kernel sobelOperator(const global float *image,
                 global float *result,
                 int rows,
                 int cols,
-                int default_cols,
+                int default_cols
                 )
 {
     int g_id_x = get_global_id(0);

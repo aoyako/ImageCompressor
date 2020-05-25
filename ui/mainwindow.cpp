@@ -46,7 +46,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_actionOpen_triggered()
 {
     QString file_name = QFileDialog::getOpenFileName(this,
-        tr("Open Image"), "/home/aoyako/cpp/compressing/build", tr("(*.png *.jpg *.bmp)"));
+        tr("Open Image"), "", tr("(*.png *.jpg *.bmp)"));
 
     if(!file_name.isEmpty()&& !file_name.isNull()){
         QImage source_image(file_name);

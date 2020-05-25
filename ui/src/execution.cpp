@@ -34,7 +34,7 @@ void Execution::initDevices(const cl::Platform &platform) {
     devices.back().context = cl::Context({devices.back().device});
     cl::Program::Sources sources;
 
-    std::ifstream code("kernel.cl");
+    std::ifstream code(KERNEL_PATH);
     if (!code) {
         std::cout<<"Cannot find \"kernel.cl\" file!"<<std::endl;
     }

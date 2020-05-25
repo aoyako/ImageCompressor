@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Image resizer
+Icon=HOME/ImageResizer/icon/icon.png
+Exec=HOME/ImageResizer/ImageResizer
+Comment=Content-aware resizing
+Categories=Utility;
+Terminal=true
