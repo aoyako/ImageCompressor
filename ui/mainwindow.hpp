@@ -48,6 +48,11 @@ private slots:
      */
     void on_autosave_stateChanged(int value);
 
+    /**
+     * @brief Changes "algorithm" flag
+     */
+    void on_lines_stateChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
 

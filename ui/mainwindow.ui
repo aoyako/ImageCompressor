@@ -28,9 +28,9 @@
         <widget class="QLineEdit" name="img_height">
          <property name="geometry">
           <rect>
-           <x>120</x>
+           <x>220</x>
            <y>50</y>
-           <width>91</width>
+           <width>171</width>
            <height>27</height>
           </rect>
          </property>
@@ -51,7 +51,7 @@
         <widget class="QLabel" name="label_2">
          <property name="geometry">
           <rect>
-           <x>120</x>
+           <x>220</x>
            <y>30</y>
            <width>66</width>
            <height>19</height>
@@ -64,7 +64,7 @@
         <widget class="QLabel" name="label_5">
          <property name="geometry">
           <rect>
-           <x>120</x>
+           <x>220</x>
            <y>100</y>
            <width>91</width>
            <height>19</height>
@@ -92,7 +92,7 @@
           <rect>
            <x>20</x>
            <y>50</y>
-           <width>91</width>
+           <width>171</width>
            <height>27</height>
           </rect>
          </property>
@@ -148,13 +148,26 @@
            <string>Use GPU</string>
           </property>
          </widget>
+         <widget class="QCheckBox" name="lines">
+          <property name="geometry">
+           <rect>
+            <x>130</x>
+            <y>40</y>
+            <width>111</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Pretty lines</string>
+          </property>
+         </widget>
         </widget>
         <widget class="QSpinBox" name="new_width">
          <property name="geometry">
           <rect>
            <x>20</x>
            <y>130</y>
-           <width>91</width>
+           <width>171</width>
            <height>30</height>
           </rect>
          </property>
@@ -162,9 +175,9 @@
         <widget class="QSpinBox" name="new_height">
          <property name="geometry">
           <rect>
-           <x>120</x>
+           <x>220</x>
            <y>130</y>
-           <width>91</width>
+           <width>171</width>
            <height>30</height>
           </rect>
          </property>

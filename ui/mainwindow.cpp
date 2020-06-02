@@ -79,7 +79,7 @@ void MainWindow::on_process_clicked()
 
     auto handle = std::async(std::launch::async, algorithm::Algorithm::resizeBMPImage, std::ref(result),
                              (image.image.width()-new_width),
-                             (image.image.height()-new_height), exec.getParams());
+                             (image.image.height()-new_height), exec.getDeviceParams(), exec.getExecutionParams());
 
     handle.get();
     image.setImage(ImageWrapper(&result.getImage()));
@@ -102,5 +102,14 @@ void MainWindow::on_autosave_stateChanged(int value)
         saver.setAutosave(true);
     } else {
         saver.setAutosave(false);
+    }
+}
+
+void MainWindow::on_lines_stateChanged(int value)
+{
+    if (value == Qt::Checked) {
+        exec.setPrettyView(true);
+    } else {
+        exec.setPrettyView(false);
     }
 }

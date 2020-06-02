@@ -25,6 +25,16 @@ namespace device {
     };
 }
 
+namespace execution {
+    /**
+     * @brief Params stores additional algorithm properties
+     */
+    class Params {
+    public:
+        bool advanced;
+    };
+}
+
 namespace algorithm {
     /**
      * @brief Wrapper around resize funciton
@@ -34,7 +44,8 @@ namespace algorithm {
         static void resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &img,
                                    size_t cut_width,
                                    size_t cut_height,
-                                   const device::Params &params
+                                   const device::Params &params,
+                                   const execution::Params &e_params
                                   );
     private:
         size_t previous_width;

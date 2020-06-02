@@ -55,8 +55,12 @@ void Execution::initDevices(const cl::Platform &platform) {
     devices.back().queue = std::make_shared<cl::CommandQueue>(devices.back().context, devices.back().device);
 }
 
-device::Params Execution::getParams() {
+device::Params Execution::getDeviceParams() {
     return devices[device_option];
+}
+
+execution::Params Execution::getExecutionParams() {
+    return execution::Params{advanced_alg};
 }
 
 void Execution::switchToGPU() {
@@ -65,4 +69,8 @@ void Execution::switchToGPU() {
 
 void Execution::switchToCPU() {
     device_option = devices.size()-1;
+}
+
+void Execution::setPrettyView(bool value) {
+    advanced_alg = value;
 }

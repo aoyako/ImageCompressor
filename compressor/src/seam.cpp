@@ -29,7 +29,8 @@ size_t nextPowerOf2(size_t n)
 void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &img,
                            size_t cut_width,
                            size_t cut_height,
-                           const device::Params &params)
+                           const device::Params &params,
+                           const execution::Params &e_params)
 {
     /// Only for benchmark, may be removed
     auto start = std::chrono::high_resolution_clock::now();
@@ -55,7 +56,12 @@ void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &i
     }
     
     /// Function initialisation
-    cl::Kernel verticalSeam = cl::Kernel(*params.program, "verticalSeam");
+    cl::Kernel verticalSeam;
+    if (e_params.advanced) {
+        verticalSeam = cl::Kernel(*params.program, "verticalSeamRight");
+    } else {
+        verticalSeam = cl::Kernel(*params.program, "verticalSeam");
+    }
     cl::Kernel removeVerticalSeam = cl::Kernel(*params.program, "removeVerticalSeam");
     cl::Kernel horisontalSeam = cl::Kernel(*params.program, "horisontalSeam");
     cl::Kernel removeHorisontalSeam = cl::Kernel(*params.program, "removeHorisontalSeam");

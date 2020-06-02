@@ -18,7 +18,12 @@ public:
     /**
      * @brief Returns selected device options
      */
-    device::Params getParams();
+    device::Params getDeviceParams();
+
+    /**
+     * @brief Returns selected device options
+     */
+    execution::Params getExecutionParams();
 
     /**
      * @brief Setup OpenCL code to specified platform
@@ -36,6 +41,11 @@ public:
     void switchToCPU();
 
     /**
+     * @brief Swithces between forward energy or normal seam finder algorithm
+     */
+    void setPrettyView(bool value);
+
+    /**
      * @brief List of available devices
      */
     std::vector<device::Params> devices;
@@ -44,4 +54,6 @@ public:
      * @brief Selected device (index in "devices")
      */
     size_t device_option = 0;
+
+    bool advanced_alg = false;
 };
