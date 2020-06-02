@@ -9,6 +9,100 @@
   * @param directiosn Matrix is used to restore path from end to begining
   * @param seam_points Array of seam column indexes, from end to begining
   */
+void kernel verticalSeamRight(const global float *input,
+                int rows,
+                int cols,
+                int default_cols,
+                local float *current_cost,
+                local float *previous_cost,
+                global int *directions,
+                global size_t *seam_points
+                )
+{
+       int id = get_local_id(0);
+       int threads = get_local_size(0);
+       int thread_cols = ceil((float) cols / threads);
+       int offset = id * thread_cols;
+
+       /// Initialise previous_cost for first row
+       for (int i = 0; i < thread_cols; ++i) {
+           int current_col = offset + i;
+           if (current_col < cols) {
+               previous_cost[current_col] = input[current_col];
+           }
+       }
+       barrier(CLK_LOCAL_MEM_FENCE);
+
+       for (int row = 1; row < rows; ++row) {
+           for (int i = 0; i < thread_cols; ++i) {
+               int current_col = offset + i;
+               if (current_col < cols) {
+                    float gradientL = 3*(input[row*default_cols + current_col-1] - input[row*default_cols + current_col+1])
+                                        *(input[row*default_cols + current_col-1] - input[row*default_cols + current_col+1])
+                                        + 3*(input[(row-1)*default_cols + current_col] - input[row*default_cols + current_col-1])
+                                        *(input[(row-1)*default_cols + current_col] - input[row*default_cols + current_col-1]);
+                                        
+                    float gradientM = 3*(input[row*default_cols + current_col-1] - input[row*default_cols + current_col+1])
+                                        *(input[row*default_cols + current_col-1] - input[row*default_cols + current_col+1]);
+                                        
+                    float gradienR = 3*(input[row*default_cols + current_col-1] - input[row*default_cols + current_col+1])
+                                        *(input[row*default_cols + current_col-1] - input[row*default_cols + current_col+1])
+                                        + 3*(input[(row-1)*default_cols + current_col] - input[row*default_cols + current_col+1])
+                                        *(input[(row-1)*default_cols + current_col] - input[row*default_cols + current_col+1]);
+                                        
+
+                    /// Left minimum
+                    if ((current_col > 0) && (previous_cost[current_col-1]+gradientL < previous_cost[current_col]+gradientM) &&
+                        ((current_col == cols-1) || (previous_cost[current_col-1]+gradientL < previous_cost[current_col+1]+gradienR))) {
+                        directions[row*default_cols + current_col] = -1;
+                        current_cost[current_col] = previous_cost[current_col-1] + input[row*default_cols + current_col] + gradientL;
+                    /// Right minimum
+                    } else if ((current_col < cols-1) && (previous_cost[current_col+1]+gradienR < previous_cost[current_col]+gradientM) &&
+                        ((current_col == 0) || (previous_cost[current_col+1]+gradienR < previous_cost[current_col-1]+gradientL))) {
+                        directions[row*default_cols + current_col] = 1;
+                        current_cost[current_col] = previous_cost[current_col+1] + input[row*default_cols + current_col] + gradienR;
+                    /// Mid minimum
+                    } else {
+                        directions[row*default_cols + current_col] = 0;
+                        current_cost[current_col] = previous_cost[current_col] + input[row*default_cols + current_col] + gradientM;
+                    }
+               }
+           }
+           local float *temp = previous_cost;
+           previous_cost = current_cost;
+           current_cost = temp;
+           barrier(CLK_LOCAL_MEM_FENCE);
+       }
+
+       /// Find minimum cost seam
+       if (id == 0) {
+           int seam_col = 0;
+           for (int i = 1; i < cols; ++i) {
+               if (previous_cost[i] < previous_cost[seam_col]) {
+                   seam_col = i;
+               }
+           }
+           int index = 0;
+           for (int row = rows-1; row >= 1; --row) {
+                seam_points[index] = seam_col;
+                seam_col = seam_col + directions[row*default_cols + seam_col];
+                index++;
+           }
+           seam_points[index] = seam_col;
+       }
+}
+
+/**
+  * @brief Finds vertical seam with minimum cost
+  * @param input Image of energy levels
+  * @param rows Width of image
+  * @param cols Height of image
+  * @param default_cols Width of buffered image (power of two)
+  * @param current_cost Array for storing seam costs of processed image row
+  * @param previous_cost Array for storing seam costs of already calculated image row
+  * @param directiosn Matrix is used to restore path from end to begining
+  * @param seam_points Array of seam column indexes, from end to begining
+  */
 void kernel verticalSeam(const global float *input,
                 int rows,
                 int cols,
@@ -79,86 +173,6 @@ void kernel verticalSeam(const global float *input,
        }
 }
 
-/**
-  * @brief Finds horisontal seam with minimum cost
-  * @param input Image of energy levels
-  * @param rows Width of image
-  * @param cols Height of image
-  * @param default_cols Width of buffered image (power of two)
-  * @param current_cost Array for storing seam costs of processed image row
-  * @param previous_cost Array for storing seam costs of already calculated image row
-  * @param directiosn Matrix is used to restore path from end to begining
-  * @param seam_points Array of seam row indexes, from end to begining
-  */
-void kernel horisontalSeam(const global float *input,
-                int rows,
-                int cols,
-                int default_cols,
-                local float *current_cost,
-                local float *previous_cost,
-                global int *directions,
-                global size_t *seam_points
-                )
-{
-       int id = get_local_id(0);
-       int threads = get_local_size(0);
-       int thread_rows = ceil((float) rows / threads);
-       int offset = id * thread_rows;
-
-       /// Initialise previous_cost for first row
-       for (int i = 0; i < thread_rows; ++i) {
-           int current_row = offset + i;
-           if (current_row < rows) {
-               previous_cost[current_row] = input[current_row * default_cols];
-           }
-       }
-       barrier(CLK_LOCAL_MEM_FENCE);
-
-       for (int col = 1; col < cols; ++col) {
-           for (int i = 0; i < thread_rows; ++i) {
-               int current_row = offset + i;
-               if (current_row < rows) {
-
-                   /// Left minimum
-                   if ((current_row > 0) && (previous_cost[current_row-1] < previous_cost[current_row]) &&
-                       ((current_row == rows-1) || (previous_cost[current_row-1] < previous_cost[current_row+1]))) {
-                       directions[current_row*default_cols + col] = -1;
-                       current_cost[current_row] = previous_cost[current_row-1] + input[current_row*default_cols + col];
-                   /// Right minimum
-                   } else if ((current_row < rows-1) && (previous_cost[current_row+1] < previous_cost[current_row]) &&
-                       ((current_row == 0) || (previous_cost[current_row+1] < previous_cost[current_row-1]))) {
-                       directions[current_row*default_cols + col] = 1;
-                       current_cost[current_row] = previous_cost[current_row+1] + input[current_row*default_cols + col];
-                   /// Mid minimum
-                   } else {
-                       directions[current_row*default_cols + col] = 0;
-                       current_cost[current_row] = previous_cost[current_row] + input[current_row*default_cols + col];
-                   }
-               }
-           }
-           local float *temp = previous_cost;
-           previous_cost = current_cost;
-           current_cost = temp;
-           barrier(CLK_LOCAL_MEM_FENCE);
-       }
-
-       /// Find minimum cost seam
-       if (id == 0) {
-           int seam_row = 0;
-           for (int i = 1; i < rows; ++i) {
-               if (previous_cost[i] < previous_cost[seam_row]) {
-                   seam_row = i;
-               }
-           }
-           int index = 0;
-           for (int col = cols-1; col >= 1; --col) {
-                seam_points[index] = seam_row;
-                seam_row = seam_row + directions[seam_row*default_cols + col];
-                index++;
-           }
-           seam_points[index] = seam_row;
-       }
-}
 
 /**
   * @brief Removes vertical seam from images
@@ -205,48 +219,31 @@ void kernel removeVerticalSeam(global float *mask,
 }
 
 /**
-  * @brief Removes horisontal seam from images
-  * @param mask First image
-  * @param image Second image
+  * @brief Rotates image
+  * @param image input image
+  * @param result rotated image
   * @param rows Width of image
   * @param cols Height of image
   * @param default_cols Width of buffered image (power of two)
-  * @param seam_points Array of seam row indexes, from end to begining
+  * @param direction 0 for clockwise, 1 for counterclockwise
   */
-void kernel removeHorisontalSeam(global float *mask,
-                global float *image,
-                int rows,
-                int cols,
-                int default_cols,
-                const global size_t *seam_points
-                )
+void kernel rotateImage(global float *image,
+                   global float *result,
+                   int rows,
+                   int cols,
+                   int default_cols,
+                   int direction
+                   )
 {
-    int id = get_local_id(0);
-    int thread_rows = ceil((float)cols / get_local_size(0));
-    int offset = id * thread_rows;
-
-    for(int col = 0; col < cols; ++col) {
-        size_t last_pixel_image = image[(thread_rows + offset)*default_cols + col];
-        size_t last_pixel_mask = mask[(thread_rows + offset)*default_cols + col];
-        barrier(CLK_LOCAL_MEM_FENCE);
-
-        for(int i = 0; i < thread_rows - 1; ++i) {
-            int row = offset + i;
-            if ((row < rows) && (row >= seam_points[cols-col-1])) {
-                image[row*default_cols + col] = image[(row+1)*default_cols + col];
-                mask[row*default_cols + col] = mask[(row+1)*default_cols + col];
-            }
-        }
-
-        int last_index = offset + thread_rows - 1;
-        if ((last_index < rows) && (last_index >= seam_points[cols-col-1])) {
-            image[last_index*default_cols + col] = last_pixel_image;
-            mask[last_index*default_cols + col] = last_pixel_mask;
-        }
-
-        barrier(CLK_LOCAL_MEM_FENCE);
+    int g_id_x = get_global_id(0);
+    int g_id_y = get_global_id(1);
+    if (direction == 1) {
+        result[rows-1-g_id_y + (g_id_x)*default_cols] = image[g_id_x + g_id_y*default_cols];
+    } else {
+        result[g_id_y + (cols-1-g_id_x)*default_cols] = image[g_id_x + g_id_y*default_cols];
     }
 }
+
 
 /**
   * @brief Applies gray filter to image

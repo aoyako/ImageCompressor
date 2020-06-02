@@ -15,7 +15,8 @@ set(CMAKE_CXX_FLAGS "-pthread")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3") 
 
 message($ENV{USER})
-add_compile_definitions(KERNEL_PATH="/home/$ENV{USER}/ImageResizer/kernel.cl")
+# add_compile_definitions(KERNEL_PATH="/home/$ENV{USER}/ImageResizer/kernel.cl")
+add_compile_definitions(KERNEL_PATH="/home/$ENV{USER}/cpp/compressing/build/kernel.cl")
 
 set(ALGORITHM_DIR "compressor/")
 set(UI_DIR "ui/")
