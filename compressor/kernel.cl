@@ -1,3 +1,10 @@
+#define BARRIER_VALUE 10e17
+#define BARRIER_LIMIT 10e15
+
+#define GET_RED(color) (((size_t) (color))/(256*256))
+#define GET_GREEN(color) ((((size_t) (color))/256) % 256)
+#define GET_BLUE(color) (((size_t) (color)) % 256)
+
 /**
   * @brief Finds vertical seam with minimum cost
   * @param input Image of energy levels
@@ -52,12 +59,12 @@ void kernel verticalSeamRight(const global float *input,
                                         
 
                     /// Left minimum
-                    if ((current_col > 0) && (previous_cost[current_col-1]+gradientL < previous_cost[current_col]+gradientM) &&
+                    if ((previous_cost[current_col-1] < BARRIER_LIMIT) && (current_col > 0) && (previous_cost[current_col-1]+gradientL < previous_cost[current_col]+gradientM) &&
                         ((current_col == cols-1) || (previous_cost[current_col-1]+gradientL < previous_cost[current_col+1]+gradienR))) {
                         directions[row*default_cols + current_col] = -1;
                         current_cost[current_col] = previous_cost[current_col-1] + input[row*default_cols + current_col] + gradientL;
                     /// Right minimum
-                    } else if ((current_col < cols-1) && (previous_cost[current_col+1]+gradienR < previous_cost[current_col]+gradientM) &&
+                    } else if ((previous_cost[current_col+1] < BARRIER_LIMIT) && (current_col < cols-1) && (previous_cost[current_col+1]+gradienR < previous_cost[current_col]+gradientM) &&
                         ((current_col == 0) || (previous_cost[current_col+1]+gradienR < previous_cost[current_col-1]+gradientL))) {
                         directions[row*default_cols + current_col] = 1;
                         current_cost[current_col] = previous_cost[current_col+1] + input[row*default_cols + current_col] + gradienR;
@@ -133,12 +140,12 @@ void kernel verticalSeam(const global float *input,
                if (current_col < cols) {
 
                    /// Left minimum
-                   if ((current_col > 0) && (previous_cost[current_col-1] < previous_cost[current_col]) &&
+                   if ((previous_cost[current_col-1] < BARRIER_LIMIT) && (current_col > 0) && (previous_cost[current_col-1] < previous_cost[current_col]) &&
                        ((current_col == cols-1) || (previous_cost[current_col-1] < previous_cost[current_col+1]))) {
                        directions[row*default_cols + current_col] = -1;
                        current_cost[current_col] = previous_cost[current_col-1] + input[row*default_cols + current_col];
                    /// Right minimum
-                   } else if ((current_col < cols-1) && (previous_cost[current_col+1] < previous_cost[current_col]) &&
+                   } else if ((previous_cost[current_col+1] < BARRIER_LIMIT) && (current_col < cols-1) && (previous_cost[current_col+1] < previous_cost[current_col]) &&
                        ((current_col == 0) || (previous_cost[current_col+1] < previous_cost[current_col-1]))) {
                        directions[row*default_cols + current_col] = 1;
                        current_cost[current_col] = previous_cost[current_col+1] + input[row*default_cols + current_col];
@@ -165,11 +172,13 @@ void kernel verticalSeam(const global float *input,
            }
            int index = 0;
            for (int row = rows-1; row >= 1; --row) {
+//                 printf("%4d ", seam_col);
                 seam_points[index] = seam_col;
                 seam_col = seam_col + directions[row*default_cols + seam_col];
                 index++;
            }
            seam_points[index] = seam_col;
+//            printf("\n");
        }
 }
 
@@ -227,7 +236,7 @@ void kernel removeVerticalSeam(global float *mask,
   * @param default_cols Width of buffered image (power of two)
   * @param direction 0 for clockwise, 1 for counterclockwise
   */
-void kernel rotateImage(global float *image,
+void kernel rotateImage(const global float *image,
                    global float *result,
                    int rows,
                    int cols,
@@ -326,4 +335,95 @@ void kernel sobelOperator(const global float *image,
             result[g_id_y*default_cols + g_id_x] = 0;
         }
     }
+}
+
+float averageColor(float m, float t, float r, float b, float l, float tr, float tl, float br, float bl) {
+    size_t red = (7*GET_RED(m) + 3*GET_RED(t) + 3*GET_RED(b) + 3*GET_RED(r) + 3*GET_RED(l) + GET_RED(tr) + GET_RED(tl) + GET_RED(br) + GET_RED(bl))/23;
+    size_t blue = (7*GET_BLUE(m) + 3*GET_BLUE(t) + 3*GET_BLUE(b) + 3*GET_BLUE(r) + 3*GET_BLUE(l) + GET_BLUE(tr) + GET_BLUE(tl) + GET_BLUE(br) + GET_BLUE(bl))/23;
+    size_t green = (7*GET_GREEN(m) + 3*GET_GREEN(t) + 3*GET_GREEN(b) + 3*GET_GREEN(r) + 3*GET_GREEN(l) + GET_GREEN(tr) + GET_GREEN(tl) + GET_GREEN(br) + GET_GREEN(bl))/23;
+    return red*256*256 + green*256 + blue;
+//     return 255*256*256;
+}
+
+void kernel insertVerticalSeam(global float *image,
+                       global float *mask,
+                       int rows,
+                       int cols,
+                       int default_cols,
+                       const global size_t *seam,
+                       local float *seam_colors
+                       )
+{
+    int id = get_local_id(0);
+
+    /// Calculate colors
+    if (id == 0) {
+        seam_colors[0] = image[seam[0]];
+        seam_colors[rows-1] = image[(rows-1)*default_cols + seam[rows-1]];
+        for (int i = 1; i < rows-1; ++i) {
+            seam_colors[i] = image[i*default_cols + seam[i]];
+            if ((seam[i] > 0) && (seam[i] < cols-1)) {
+                seam_colors[i] = averageColor(image[i*default_cols + seam[i]], image[i*default_cols + seam[i] + 1], image[i*default_cols + seam[i] - 1],
+                                              image[(i+1)*default_cols + seam[i]], image[(i-1)*default_cols + seam[i]], 
+                                              image[(i+1)*default_cols + seam[i] + 1], image[(i-1)*default_cols + seam[i] - 1],
+                                              image[(i+1)*default_cols + seam[i] - 1], image[(i-1)*default_cols + seam[i] + 1]);
+            }
+        }
+//         int current_col = seam[0];
+//         if (current_col == 0) {
+//             seam_colors[0] = (7*image[current_col] + 3*image[current_col + default_cols] + 3*image[current_col + 1]
+//                     + image[current_col + 1 + default_cols]) / 14;
+//         } else if (current_col == cols-1) {
+//             seam_colors[0] = (7*image[current_col] + 3*image[current_col + default_cols] + 3*image[current_col - 1]
+//                     + image[current_col - 1 + default_cols]) / 14;
+//         } else {
+//             seam_colors[0] = (7*image[current_col] + 3*image[current_col - 1] + 3*image[current_col + 1] + 3*image[current_col + default_cols]
+//                     + image[current_col + 1 + default_cols] + image[current_col - 1 + default_cols]) / 18;
+//         }
+//         for (int i = 1; i < rows-1; ++i) {
+//             current_col = seam[i];
+//             if (current_col == 0) {
+//                 seam_colors[i] = (7*image[current_col + i*default_cols]
+//                         + 3*image[current_col + (i + 1)*default_cols] + 3*image[current_col + (i - 1)*default_cols] + 3*image[current_col + 1 + i*default_cols]
+//                         + image[current_col + 1 + (i + 1)*default_cols] + image[current_col + 1 + (i - 1)*default_cols]) / 18;
+//             } else if (current_col == cols-1) {
+//                 seam_colors[i] = (7*image[current_col + i*default_cols]
+//                         + 3*image[current_col + (i + 1)*default_cols] + 3*image[current_col + (i - 1)*default_cols] + 3*image[current_col - 1 + i*default_cols]
+//                         + image[current_col - 1 + (i + 1)*default_cols] + image[current_col - 1 + (i - 1)*default_cols]) / 18;
+//             } else {
+//                 seam_colors[i] = (7*image[current_col + i*default_cols]
+//                         + 3*image[current_col + (i + 1)*default_cols] + 3*image[current_col + (i - 1)*default_cols]
+//                         + 3*image[current_col - 1 + i*default_cols] + 3*image[current_col + 1 + i*default_cols]
+//                         + image[current_col - 1 + (i + 1)*default_cols] + image[current_col - 1 + (i - 1)*default_cols]
+//                         + image[current_col + 1 + (i + 1)*default_cols] + image[current_col + 1 + (i - 1)*default_cols]) / 23;
+//             }
+//         }
+//         current_col = seam[rows-1];
+//         if (current_col == 0) {
+//             seam_colors[rows-1] = (7*image[current_col + (rows-1)*default_cols] + 3*image[current_col + (rows-2)*default_cols] + 3*image[current_col + 1 + (rows-1)*default_cols]
+//                     + image[current_col + 1 + (rows-2)*default_cols]) / 14;
+//         } else if (current_col == cols-1) {
+//             seam_colors[rows-1] = (7*image[current_col + (rows-1)*default_cols] + 3*image[current_col + (rows-2)*default_cols] + 3*image[current_col - 1 + (rows-1)*default_cols]
+//                     + image[current_col - 1 + (rows-2)*default_cols]) / 14;
+//         } else {
+//             seam_colors[rows-1] = (7*image[current_col + (rows-1)*default_cols] + 3*image[current_col - 1 + (rows-1)*default_cols] + 3*image[current_col + 1 + (rows-1)*default_cols] + 3*image[current_col  + (rows-2)*default_cols]
+//                     + image[current_col + 1  + (rows-2)*default_cols] + image[current_col - 1 + (rows-2)*default_cols]) / 18;
+//         }
+    }
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    int thread_rows = ceil((float)rows / get_local_size(0));
+    int offset = id * thread_rows;
+
+        for (int index = 0; index < thread_rows; ++index) {
+            if (offset + index < rows) {
+                for (int i = cols; i > seam[offset+index]; --i) {
+                    image[(offset+index)*default_cols + i] = image[(offset+index)*default_cols + i - 1];
+                    mask[(offset+index)*default_cols + i] = mask[(offset+index)*default_cols + i - 1];
+                }
+                image[(offset+index)*default_cols + seam[offset+index]] = seam_colors[offset+index];
+                mask[(offset+index)*default_cols + seam[offset+index]] = BARRIER_VALUE;
+                mask[(offset+index)*default_cols + seam[offset+index] + 1] = BARRIER_VALUE;
+            }
+        }
 }

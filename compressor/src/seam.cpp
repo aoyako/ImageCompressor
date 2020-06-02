@@ -40,8 +40,8 @@ void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &i
     int image_width = img.width();
     int image_height = img.height();
 
-    int normalised_width = nextPowerOf2(image_width);
-    int normalised_height = nextPowerOf2(image_height);
+    int normalised_width = nextPowerOf2(image_width)*2;
+    int normalised_height = nextPowerOf2(image_height)*2;
     int normalised_size = std::max(normalised_width, normalised_height);
     
     /// Contains pixels in float type
@@ -68,6 +68,7 @@ void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &i
     cl::Kernel grayFilter = cl::Kernel(*params.program, "grayLevel");
     cl::Kernel sobelOperator = cl::Kernel(*params.program, "sobelOperator");
     cl::Kernel imageRotate = cl::Kernel(*params.program, "rotateImage");
+    cl::Kernel insertVerticalSeam = cl::Kernel(*params.program, "insertVerticalSeam");
     
     /// Buffer creation
     cl::Buffer mask_buffer(params.context, CL_MEM_READ_WRITE, sizeof(float) * normalised_size * normalised_size);
@@ -195,12 +196,43 @@ void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &i
             cl::NDRange(1, 1));
     
     std::swap(image_width, image_height);
+
+
+    res = verticalSeam.setArg(0, mask_buffer);
+    res = verticalSeam.setArg(1, image_height);
+    res = verticalSeam.setArg(3, normalised_size);
+    res = verticalSeam.setArg(6, directions_buffer);
+    res = verticalSeam.setArg(7, seam_points_buffer);
+    res = verticalSeam.setArg(4, sizeof(float)*normalised_size, nullptr);
+    res = verticalSeam.setArg(5, sizeof(float)*normalised_size, nullptr);
+    res = insertVerticalSeam.setArg(0, image_buffer);
+    res = insertVerticalSeam.setArg(1, mask_buffer);
+    res = insertVerticalSeam.setArg(2, image_height);
+    res = insertVerticalSeam.setArg(4, normalised_size);
+    res = insertVerticalSeam.setArg(5, seam_points_buffer);
+    res = insertVerticalSeam.setArg(6, sizeof(float)*normalised_size, nullptr);
+    for (int i = 0; i < 500; ++i) {
+        res = verticalSeam.setArg(2, image_width+i);
+        res = params.queue->enqueueNDRangeKernel(verticalSeam, cl::NullRange,
+            cl::NDRange(WORKGROUP_SIZE),
+            cl::NDRange(WORKGROUP_SIZE));
+        res = insertVerticalSeam.setArg(3, image_width+i);
+        res = params.queue->enqueueNDRangeKernel(insertVerticalSeam, cl::NullRange,
+                cl::NDRange(WORKGROUP_SIZE),
+                cl::NDRange(WORKGROUP_SIZE));
+//         std::cout<<res<<std::endl;
+    }
+    image_width += 500;
+
+
     /// Read results
     res = params.queue->enqueueReadBuffer(image_buffer, CL_TRUE, 0, sizeof(float)* normalised_size * normalised_size, image);
     params.queue->finish();
 
     /// Convert float* back to bitmap
     size_t index = 0;
+    delete[] img.getImage().data;
+    img.getImage().data = new image::BMPColor [image_width*image_height];
     for (int i = 0; i < image_height; ++i) {
         for (int j = 0; j < image_width; ++j) {
             img.getImage().data[index] = image::BMPColor(((size_t) image[i*normalised_size + j])/(256*256),

@@ -11,9 +11,10 @@ Execution::Execution() {
         exit(1);
     }
 
-    for (auto const &platrform : all_platforms) {
-        initDevices(platrform);
-    }
+//     for (auto const &platrform : all_platforms) {
+//         initDevices(platrform);
+//     }
+    initDevices(all_platforms[1]);
 
     device_option = all_platforms.size()-1;
 }
