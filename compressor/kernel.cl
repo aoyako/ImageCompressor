@@ -1,5 +1,5 @@
-#define BARRIER_VALUE 10e17
-#define BARRIER_LIMIT 10e15
+#define BARRIER_VALUE 256*10e7
+#define BARRIER_LIMIT 256*10e6
 
 #define GET_RED(color) (((size_t) (color))/(256*256))
 #define GET_GREEN(color) ((((size_t) (color))/256) % 256)
@@ -24,7 +24,7 @@ void kernel verticalSeamRight(const global float *input,
                 local float *previous_cost,
                 global int *directions,
                 global size_t *seam_points,
-                const global float *barriers
+                global float *b
                 )
 {
        int id = get_local_id(0);
@@ -36,7 +36,7 @@ void kernel verticalSeamRight(const global float *input,
        for (int i = 0; i < thread_cols; ++i) {
            int current_col = offset + i;
            if (current_col < cols) {
-               previous_cost[current_col] = input[current_col]+barriers[current_col];
+               previous_cost[current_col] = input[current_col];
            }
        }
        barrier(CLK_LOCAL_MEM_FENCE);
@@ -58,24 +58,21 @@ void kernel verticalSeamRight(const global float *input,
                                         + 3*(input[(row-1)*default_cols + current_col] - input[row*default_cols + current_col+1])
                                         *(input[(row-1)*default_cols + current_col] - input[row*default_cols + current_col+1]);
                                         
-                    int barrier_left = barriers[row*default_cols + current_col - 1];
-                    int barrier_right = barriers[row*default_cols + current_col + 1];
-                    int barrier_mid = barriers[row*default_cols + current_col];
-                    /// Left minimum
-                    if ((current_col > 0) && ((previous_cost[current_col-1]+gradientL) < (previous_cost[current_col]+gradientM)) &&
-                        ((current_col == cols-1) || ((previous_cost[current_col-1]+gradientL) < (previous_cost[current_col+1]+gradienR)))) {
-                        directions[row*default_cols + current_col] = -1;
-                        current_cost[current_col] = previous_cost[current_col-1] + barrier_left + (input[row*default_cols + current_col] + gradientL);
-                    /// Right minimum
-                    } else if ((current_col < cols-1) && ((previous_cost[current_col+1]+gradienR) < (previous_cost[current_col]+gradientM)) &&
-                        ((current_col == 0) || ((previous_cost[current_col+1]+gradienR) < (previous_cost[current_col-1]+gradientL)))) {
-                        directions[row*default_cols + current_col] = 1;
-                        current_cost[current_col] = previous_cost[current_col+1] + barrier_right + (input[row*default_cols + current_col] + gradienR);
-                    /// Mid minimum
-                    } else {
-                        directions[row*default_cols + current_col] = 0;
-                        current_cost[current_col] = previous_cost[current_col] + barrier_mid + (input[row*default_cols + current_col] + gradientM);
-                    }
+                        /// Left minimum
+                        if ((current_col > 0) && (previous_cost[current_col-1]+gradientL < previous_cost[current_col]+gradientM) &&
+                            ((current_col == cols-1) || (previous_cost[current_col-1]+gradientL < previous_cost[current_col+1]+gradienR))) {
+                            directions[row*default_cols + current_col] = -1;
+                            current_cost[current_col] = previous_cost[current_col-1] + input[row*default_cols + current_col] + gradientL;
+                        /// Right minimum
+                        } else if ((current_col < cols-1) && (previous_cost[current_col+1]+gradienR < previous_cost[current_col]+gradientM) &&
+                            ((current_col == 0) || (previous_cost[current_col+1]+gradienR < previous_cost[current_col-1]+gradientL))) {
+                            directions[row*default_cols + current_col] = 1;
+                            current_cost[current_col] = previous_cost[current_col+1] + input[row*default_cols + current_col] + gradienR;
+                        /// Mid minimum
+                        } else {
+                            directions[row*default_cols + current_col] = 0;
+                            current_cost[current_col] = previous_cost[current_col] + input[row*default_cols + current_col] + gradientM;
+                        }
                }
            }
            local float *temp = previous_cost;
@@ -120,8 +117,7 @@ void kernel verticalSeam(const global float *input,
                 local float *current_cost,
                 local float *previous_cost,
                 global int *directions,
-                global size_t *seam_points,
-                const global float *barriers
+                global size_t *seam_points
                 )
 {
        int id = get_local_id(0);
@@ -176,11 +172,13 @@ void kernel verticalSeam(const global float *input,
            }
            int index = 0;
            for (int row = rows-1; row >= 1; --row) {
+//                 printf("%4d ", seam_col);
                 seam_points[index] = seam_col;
                 seam_col = seam_col + directions[row*default_cols + seam_col];
                 index++;
            }
            seam_points[index] = seam_col;
+//            printf("\n");
        }
 }
 
@@ -334,15 +332,15 @@ void kernel sobelOperator(const global float *image,
             int temp = sqrt(gx*gx + gy*gy)/sqrt(2.0);
             result[g_id_y*default_cols + g_id_x] = temp;
         } else {
-            result[g_id_y*default_cols + g_id_x] = 1;
+            result[g_id_y*default_cols + g_id_x] = 0;
         }
     }
 }
 
 float averageColor(float m, float t, float r, float b, float l, float tr, float tl, float br, float bl) {
-    size_t red = (10*GET_RED(m) + 3*GET_RED(t) + 3*GET_RED(b) + 3*GET_RED(r) + 3*GET_RED(l) + GET_RED(tr) + GET_RED(tl) + GET_RED(br) + GET_RED(bl))/26;
-    size_t blue = (10*GET_BLUE(m) + 3*GET_BLUE(t) + 3*GET_BLUE(b) + 3*GET_BLUE(r) + 3*GET_BLUE(l) + GET_BLUE(tr) + GET_BLUE(tl) + GET_BLUE(br) + GET_BLUE(bl))/26;
-    size_t green = (10*GET_GREEN(m) + 3*GET_GREEN(t) + 3*GET_GREEN(b) + 3*GET_GREEN(r) + 3*GET_GREEN(l) + GET_GREEN(tr) + GET_GREEN(tl) + GET_GREEN(br) + GET_GREEN(bl))/26;
+    size_t red = (4*GET_RED(m) + 2*GET_RED(t) + 2*GET_RED(b) + 2*GET_RED(r) + 2*GET_RED(l) + GET_RED(tr) + GET_RED(tl) + GET_RED(br) + GET_RED(bl))/16;
+    size_t blue = (4*GET_BLUE(m) + 2*GET_BLUE(t) + 2*GET_BLUE(b) + 2*GET_BLUE(r) + 2*GET_BLUE(l) + GET_BLUE(tr) + GET_BLUE(tl) + GET_BLUE(br) + GET_BLUE(bl))/16;
+    size_t green = (4*GET_GREEN(m) + 2*GET_GREEN(t) + 2*GET_GREEN(b) + 2*GET_GREEN(r) + 2*GET_GREEN(l) + GET_GREEN(tr) + GET_GREEN(tl) + GET_GREEN(br) + GET_GREEN(bl))/16;
     return red*256*256 + green*256 + blue;
 //     return 255*256*256;
 }
@@ -354,7 +352,7 @@ void kernel insertVerticalSeam(global float *image,
                        int default_cols,
                        const global size_t *seam,
                        local float *seam_colors,
-                       global float *barriers
+                        global float *b
                        )
 {
     int id = get_local_id(0);
@@ -383,24 +381,21 @@ void kernel insertVerticalSeam(global float *image,
                 for (int i = cols; i > seam[offset+index]; --i) {
                     image[(offset+index)*default_cols + i] = image[(offset+index)*default_cols + i - 1];
                     mask[(offset+index)*default_cols + i] = mask[(offset+index)*default_cols + i - 1];
-                    barriers[(offset+index)*default_cols + i] = barriers[(offset+index)*default_cols + i - 1];
                 }
                 image[(offset+index)*default_cols + seam[offset+index]] = seam_colors[offset+index];
-                mask[(offset+index)*default_cols + seam[offset+index]] = BARRIER_VALUE;
-                mask[(offset+index)*default_cols + seam[offset+index]+1] = BARRIER_VALUE;
-                barriers[(offset+index)*default_cols + seam[offset+index]] = 255;
-                barriers[(offset+index)*default_cols + seam[offset+index] + 1] = 255;
-//                 barriers[(offset+index)*default_cols + seam[offset+index] + 2] = 255*256;
-//                 barriers[(offset+index)*default_cols + seam[offset+index] - 1] = 255*256;
+                if (mask[(offset+index)*default_cols + seam[offset+index]] >= BARRIER_LIMIT) {
+                    mask[(offset+index)*default_cols + seam[offset+index]] *= 2;
+                } else 
+                {
+                    mask[(offset+index)*default_cols + seam[offset+index]] = BARRIER_VALUE;
+                }
+                
+                if (mask[(offset+index)*default_cols + seam[offset+index] + 1] >= BARRIER_LIMIT) {
+                    mask[(offset+index)*default_cols + seam[offset+index] + 1] *= 2;
+                } else 
+                {
+                    mask[(offset+index)*default_cols + seam[offset+index] + 1] = BARRIER_VALUE;
+                }
             }
         }
-}
-
-void kernel resetBarrier(global float *barrier,
-                        int default_cols
-                        )
-{
-    int g_id_x = get_global_id(0);
-    int g_id_y = get_global_id(1);
-    barrier[g_id_y*default_cols + g_id_x] = 1;
 }
