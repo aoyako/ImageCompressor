@@ -381,6 +381,7 @@ void kernel insertVerticalSeam(global float *image,
                     mask[(offset+index)*default_cols + i] = mask[(offset+index)*default_cols + i - 1];
                 }
                 image[(offset+index)*default_cols + seam[offset+index]] = seam_colors[offset+index];
+                
                 if (mask[(offset+index)*default_cols + seam[offset+index]] >= BARRIER_LIMIT) {
                     mask[(offset+index)*default_cols + seam[offset+index]] *= 2;
                 } else 
