@@ -28,3 +28,9 @@ Image resizing applicationg based on Seam carving algorithm
 </p>
 
 > From 2000 px wide to 1000 px
+
+### Installiation
+
+Run ```
+$ ./install.sh
+```

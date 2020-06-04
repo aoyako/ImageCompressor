@@ -336,14 +336,35 @@ void kernel sobelOperator(const global float *image,
     }
 }
 
+/**
+  * @brief Calculates average color of pixel and it's neighbours
+  * @param m center pixel
+  * @param t top pixel
+  * @param b bottom pixel
+  * @param l left pixel
+  * @param r right pixel
+  * @param tr top-right pixel
+  * @param tl top-left pixel
+  * @param br bottom-right pixel
+  * @param bl bottom-left pixel
+  */
 float averageColor(float m, float t, float r, float b, float l, float tr, float tl, float br, float bl) {
     size_t red = (4*GET_RED(m) + 2*GET_RED(t) + 2*GET_RED(b) + 2*GET_RED(r) + 2*GET_RED(l) + GET_RED(tr) + GET_RED(tl) + GET_RED(br) + GET_RED(bl))/16;
     size_t blue = (4*GET_BLUE(m) + 2*GET_BLUE(t) + 2*GET_BLUE(b) + 2*GET_BLUE(r) + 2*GET_BLUE(l) + GET_BLUE(tr) + GET_BLUE(tl) + GET_BLUE(br) + GET_BLUE(bl))/16;
     size_t green = (4*GET_GREEN(m) + 2*GET_GREEN(t) + 2*GET_GREEN(b) + 2*GET_GREEN(r) + 2*GET_GREEN(l) + GET_GREEN(tr) + GET_GREEN(tl) + GET_GREEN(br) + GET_GREEN(bl))/16;
     return red*256*256 + green*256 + blue;
-//     return 255*256*256;
 }
 
+/**
+  * @brief Inserts new pixels
+  * @param image Processed image
+  * @param mask Energy map of image
+  * @param rows heigth of image
+  * @param cols width of image
+  * @param default_cols width of buffered image
+  * @param seam list of columns, where pixels will be inserted
+  * @param seam_colors colors of inserted pixels
+  */
 void kernel insertVerticalSeam(global float *image,
                        global float *mask,
                        int rows,

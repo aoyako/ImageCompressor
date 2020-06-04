@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.12)
 
-project(ImageCompressing VERSION 0.1 LANGUAGES CXX)
+project(ImageCompressing VERSION 2.0 LANGUAGES CXX)
 
 #set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Release)
@@ -12,12 +12,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 set(CMAKE_CXX_FLAGS "-pthread")
-set(CMAKE_CXX_FLAGS_RELEASE "-g3") 
-# set(CMAKE_CXX_FLAGS_RELEASE "-O3") 
+# set(CMAKE_CXX_FLAGS_RELEASE "-g3") 
+set(CMAKE_CXX_FLAGS_RELEASE "-O3") 
 
 message($ENV{USER})
-# add_compile_definitions(KERNEL_PATH="/home/$ENV{USER}/ImageResizer/kernel.cl")
-add_compile_definitions(KERNEL_PATH="/home/$ENV{USER}/cpp/compressing/build/kernel.cl")
+add_compile_definitions(KERNEL_PATH="/home/$ENV{USER}/ImageResizer/kernel.cl")
+# add_compile_definitions(KERNEL_PATH="/home/$ENV{USER}/cpp/compressing/build/kernel.cl")
 
 set(ALGORITHM_DIR "compressor/")
 set(UI_DIR "ui/")
