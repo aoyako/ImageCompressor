@@ -23,8 +23,7 @@ void kernel verticalSeamRight(const global float *input,
                 local float *current_cost,
                 local float *previous_cost,
                 global int *directions,
-                global size_t *seam_points,
-                global float *b
+                global size_t *seam_points
                 )
 {
        int id = get_local_id(0);
@@ -351,8 +350,7 @@ void kernel insertVerticalSeam(global float *image,
                        int cols,
                        int default_cols,
                        const global size_t *seam,
-                       local float *seam_colors,
-                        global float *b
+                       local float *seam_colors
                        )
 {
     int id = get_local_id(0);
