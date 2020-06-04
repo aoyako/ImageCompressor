@@ -1,6 +1,6 @@
 #!/bin/bash
 mkdir build
-cd build && cmake .. && make
+cd build && cmake -D DEBUG=OFF .. && make
 
 mkdir $HOME/ImageResizer
 mkdir $HOME/ImageResizer/icon

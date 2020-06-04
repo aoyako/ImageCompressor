@@ -129,8 +129,8 @@ void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &i
     int image_width = img.width();
     int image_height = img.height();
 
-    int normalised_width = nextPowerOf2(image_width-cut_width);
-    int normalised_height = nextPowerOf2(image_height-cut_height);
+    int normalised_width = nextPowerOf2(std::max(image_width-cut_width, image_width));
+    int normalised_height = nextPowerOf2(std::max(image_height-cut_height, image_height));
     int normalised_size = std::max(normalised_width, normalised_height);
     
     /// Contains pixels in float type
@@ -140,7 +140,7 @@ void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &i
     for (int i = 0; i < image_height; ++i) {
         for (int j = 0; j < image_width; ++j) {
             auto color = img.pixel(j, i);
-            image[i*normalised_width + j] = ((size_t) color.red())*256*256 + ((size_t) color.green())*256 + ((size_t) color.blue());
+            image[i*normalised_size + j] = ((size_t) color.red())*256*256 + ((size_t) color.green())*256 + ((size_t) color.blue());
         }
     }
     
