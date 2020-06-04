@@ -31,6 +31,7 @@ Image resizing applicationg based on Seam carving algorithm
 
 ### Installiation
 
-Run ```
+Run: 
+```sh
 $ ./install.sh
 ```
