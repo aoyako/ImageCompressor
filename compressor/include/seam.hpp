@@ -42,8 +42,8 @@ namespace algorithm {
     class Algorithm {
     public:
         static void resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &img,
-                                   size_t cut_width,
-                                   size_t cut_height,
+                                   int cut_width,
+                                   int cut_height,
                                    const device::Params &params,
                                    const execution::Params &e_params
                                   );

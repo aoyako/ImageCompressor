@@ -61,8 +61,8 @@ void MainWindow::on_actionOpen_triggered()
 
         ui->new_width->setEnabled(true);
         ui->new_height->setEnabled(true);
-        ui->new_width->setRange(1, source_image.width());
-        ui->new_height->setRange(1, source_image.height());
+        ui->new_width->setRange(1, 2*source_image.width());
+        ui->new_height->setRange(1, 2*source_image.height());
         ui->new_width->setValue(source_image.width());
         ui->new_height->setValue(source_image.height());
 

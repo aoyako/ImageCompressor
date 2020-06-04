@@ -12,7 +12,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 set(CMAKE_CXX_FLAGS "-pthread")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3") 
+set(CMAKE_CXX_FLAGS_RELEASE "-g3") 
+# set(CMAKE_CXX_FLAGS_RELEASE "-O3") 
 
 message($ENV{USER})
 # add_compile_definitions(KERNEL_PATH="/home/$ENV{USER}/ImageResizer/kernel.cl")

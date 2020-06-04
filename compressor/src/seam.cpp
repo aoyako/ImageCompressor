@@ -2,8 +2,11 @@
 
 #include <memory>
 #include <chrono>
+#include <cassert>
 
 namespace algorithm {
+    
+int WORKGROUP_SIZE = 1;
 
 namespace  {
 
@@ -24,11 +27,97 @@ size_t nextPowerOf2(size_t n)
     return 1 << count;
 }
 
+void grayImage(cl::Kernel &grayFilter, cl::CommandQueue &queue, cl::Buffer &image, cl::Buffer &result, 
+               int height, int width, int normalised_size)  {
+    int res = grayFilter.setArg(0, image);
+    res = grayFilter.setArg(1, result);
+    res = grayFilter.setArg(2, height);
+    res = grayFilter.setArg(3, width);
+    res = grayFilter.setArg(4, normalised_size);
+    res = queue.enqueueNDRangeKernel(grayFilter, cl::NullRange,
+            cl::NDRange(width, height),
+            cl::NDRange(1, 1));
+    assert(res == 0);
+}
+
+void sobelImage(cl::Kernel &sobelOperator, cl::CommandQueue &queue, cl::Buffer &image, cl::Buffer &result, 
+               int height, int width, int normalised_size)  {
+    int res = sobelOperator.setArg(0, image);
+    res = sobelOperator.setArg(1, result);
+    res = sobelOperator.setArg(2, height);
+    res = sobelOperator.setArg(3, width);
+    res = sobelOperator.setArg(4, normalised_size);
+    res = queue.enqueueNDRangeKernel(sobelOperator, cl::NullRange,
+            cl::NDRange(width, height),
+            cl::NDRange(1, 1));
+    assert(res == 0);
+}
+
+void findSeam(cl::Kernel &findSeam, cl::CommandQueue &queue, cl::Buffer &image, cl::Buffer &directions, cl::Buffer &seam,
+               int height, int width, int normalised_size)  {
+    int res = findSeam.setArg(0, image);
+    res = findSeam.setArg(1, height);
+    res = findSeam.setArg(2, width);
+    res = findSeam.setArg(3, normalised_size);
+    res = findSeam.setArg(4, sizeof(float)*normalised_size, nullptr);
+    res = findSeam.setArg(5, sizeof(float)*normalised_size, nullptr);
+    res = findSeam.setArg(6, directions);
+    res = findSeam.setArg(7, seam);
+    res = findSeam.setArg(4, normalised_size);
+    res = queue.enqueueNDRangeKernel(findSeam, cl::NullRange,
+            cl::NDRange(WORKGROUP_SIZE),
+            cl::NDRange(WORKGROUP_SIZE));
+    assert(res == 0);
+}
+
+void removeSeam(cl::Kernel &removeSeam, cl::CommandQueue &queue, cl::Buffer &mask, cl::Buffer &image, cl::Buffer seam,
+               int height, int width, int normalised_size)  {
+    int res = removeSeam.setArg(0, mask);
+    res = removeSeam.setArg(1, image);
+    res = removeSeam.setArg(2, height);
+    res = removeSeam.setArg(3, width);
+    res = removeSeam.setArg(4, normalised_size);
+    res = removeSeam.setArg(5, seam);
+    res = queue.enqueueNDRangeKernel(removeSeam, cl::NullRange,
+            cl::NDRange(WORKGROUP_SIZE),
+            cl::NDRange(WORKGROUP_SIZE));
+    assert(res == 0);
+}
+
+void insertSeam(cl::Kernel &insertSeam, cl::CommandQueue &queue, cl::Buffer &image, cl::Buffer &mask, cl::Buffer seam,
+               int height, int width, int normalised_size)  {
+    int res = insertSeam.setArg(0, image);
+    res = insertSeam.setArg(1, mask);
+    res = insertSeam.setArg(2, height);
+    res = insertSeam.setArg(3, width);
+    res = insertSeam.setArg(4, normalised_size);
+    res = insertSeam.setArg(5, seam);
+    res = insertSeam.setArg(6, sizeof(float)*normalised_size, nullptr);
+    res = queue.enqueueNDRangeKernel(insertSeam, cl::NullRange,
+            cl::NDRange(WORKGROUP_SIZE),
+            cl::NDRange(WORKGROUP_SIZE));
+    assert(res == 0);
+}
+
+void rotateImage(cl::Kernel &rotateImage, cl::CommandQueue &queue, cl::Buffer &image, cl::Buffer &result, int direction,
+               int height, int width, int normalised_size)  {
+    int res = rotateImage.setArg(0, image);
+    res = rotateImage.setArg(1, result);
+    res = rotateImage.setArg(2, height);
+    res = rotateImage.setArg(3, width);
+    res = rotateImage.setArg(4, normalised_size);
+    res = rotateImage.setArg(5, direction);
+    res = queue.enqueueNDRangeKernel(rotateImage, cl::NullRange,
+            cl::NDRange(width, height),
+            cl::NDRange(1, 1));
+    assert(res == 0);
+}
+
 }
 
 void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &img,
-                           size_t cut_width,
-                           size_t cut_height,
+                           int cut_width,
+                           int cut_height,
                            const device::Params &params,
                            const execution::Params &e_params)
 {
@@ -36,12 +125,12 @@ void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &i
     auto start = std::chrono::high_resolution_clock::now();
 
     /// Max workgroup size
-    int WORKGROUP_SIZE = std::min<int>(params.device.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>(), 256);
+    WORKGROUP_SIZE = std::min<int>(params.device.getInfo<CL_DEVICE_MAX_WORK_GROUP_SIZE>(), 256);
     int image_width = img.width();
     int image_height = img.height();
 
-    int normalised_width = nextPowerOf2(image_width);
-    int normalised_height = nextPowerOf2(image_height);
+    int normalised_width = nextPowerOf2(image_width-cut_width);
+    int normalised_height = nextPowerOf2(image_height-cut_height);
     int normalised_size = std::max(normalised_width, normalised_height);
     
     /// Contains pixels in float type
@@ -68,139 +157,93 @@ void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &i
     cl::Kernel grayFilter = cl::Kernel(*params.program, "grayLevel");
     cl::Kernel sobelOperator = cl::Kernel(*params.program, "sobelOperator");
     cl::Kernel imageRotate = cl::Kernel(*params.program, "rotateImage");
+    cl::Kernel insertVerticalSeam = cl::Kernel(*params.program, "insertVerticalSeam");
+    cl::Kernel resetBarrier = cl::Kernel(*params.program, "resetBarrier");
     
     /// Buffer creation
     cl::Buffer mask_buffer(params.context, CL_MEM_READ_WRITE, sizeof(float) * normalised_size * normalised_size);
     cl::Buffer image_buffer(params.context, CL_MEM_READ_WRITE, sizeof(float) * normalised_size * normalised_size);
     cl::Buffer temp_buffer(params.context, CL_MEM_READ_WRITE, sizeof(float) * normalised_size * normalised_size);
     cl::Buffer directions_buffer(params.context, CL_MEM_READ_WRITE, sizeof(int) * normalised_size * normalised_size);
+    cl::Buffer barrier_buffer(params.context, CL_MEM_READ_WRITE, sizeof(float) * normalised_size * normalised_size);
     cl::Buffer seam_points_buffer(params.context, CL_MEM_READ_WRITE, sizeof(size_t) * normalised_size);
     
     /// Result code
     int res;
+    /// Load image to buffer
     res = params.queue->enqueueWriteBuffer(image_buffer, CL_TRUE, 0, sizeof(float) * normalised_size * normalised_size, image);
 
     /// Apply gray filter
-    res = grayFilter.setArg(0, image_buffer);
-    res = grayFilter.setArg(1, temp_buffer);
-    res = grayFilter.setArg(2, image_height);
-    res = grayFilter.setArg(3, image_width);
-    res = grayFilter.setArg(4, normalised_size);
-    res = params.queue->enqueueNDRangeKernel(grayFilter, cl::NullRange,  // kernel, offset
-            cl::NDRange(normalised_width, normalised_height), // global number of work items
-            cl::NDRange(16, 16));
+    grayImage(grayFilter, *params.queue, image_buffer, temp_buffer, image_height, image_width, normalised_size);
 
     /// Apply Sobel operator
-    res = sobelOperator.setArg(0, temp_buffer);
-    res = sobelOperator.setArg(1, mask_buffer);
-    res = sobelOperator.setArg(2, image_height);
-    res = sobelOperator.setArg(3, image_width);
-    res = sobelOperator.setArg(4, normalised_size);
-    res = params.queue->enqueueNDRangeKernel(sobelOperator, cl::NullRange,  // kernel, offset
-            cl::NDRange(normalised_width, normalised_height), // global number of work items
-            cl::NDRange(16, 16));
+    sobelImage(sobelOperator, *params.queue, temp_buffer, mask_buffer, image_height, image_width, normalised_size);
 
-    /// Search and remove of vertical seams
-    res = verticalSeam.setArg(0, mask_buffer);
-    res = verticalSeam.setArg(1, image_height);
-    res = verticalSeam.setArg(3, normalised_size);
-    res = verticalSeam.setArg(6, directions_buffer);
-    res = verticalSeam.setArg(7, seam_points_buffer);
-
-    res = removeVerticalSeam.setArg(0, mask_buffer);
-    res = removeVerticalSeam.setArg(1, image_buffer);
-    res = removeVerticalSeam.setArg(2, image_height);
-    res = removeVerticalSeam.setArg(4, normalised_size);
-    res = removeVerticalSeam.setArg(5, seam_points_buffer);
-
+    /// Vertical
+    /// Remove seams
     for (int i = 0; i < cut_width; ++i) {
-        res = verticalSeam.setArg(2, image_width-i);
-        res = verticalSeam.setArg(4, sizeof(float)*normalised_size, nullptr);
-        res = verticalSeam.setArg(5, sizeof(float)*normalised_size, nullptr);
-        res = params.queue->enqueueNDRangeKernel(verticalSeam, cl::NullRange,
-                cl::NDRange(WORKGROUP_SIZE),
-                cl::NDRange(WORKGROUP_SIZE));
-
-
-        res = removeVerticalSeam.setArg(3, image_width-i);
-        res = params.queue->enqueueNDRangeKernel(removeVerticalSeam, cl::NullRange,
-                cl::NDRange(WORKGROUP_SIZE),
-                cl::NDRange(WORKGROUP_SIZE));
+        findSeam(verticalSeam, *params.queue, mask_buffer, directions_buffer, seam_points_buffer, image_height, image_width - i, normalised_size);
+        removeSeam(removeVerticalSeam, *params.queue, mask_buffer, image_buffer, seam_points_buffer, image_height, image_width - i, normalised_size);
     }
+    
+    /// Insert seams
+    for (int i = 0; i < -cut_width; ++i) {
+        findSeam(verticalSeam, *params.queue, mask_buffer, directions_buffer, seam_points_buffer, image_height, image_width + i, normalised_size);
+        insertSeam(insertVerticalSeam, *params.queue, image_buffer, mask_buffer, seam_points_buffer, image_height, image_width + i, normalised_size);
+    }
+    
+    /// Reduce width after changing image
+    image_width -= cut_width;
     
     /// Performing rotation
+    /// image -> temp
+    rotateImage(imageRotate, *params.queue, image_buffer, temp_buffer, 1, image_height, image_width, normalised_size);
     
-    image_width -= cut_width;
-    imageRotate.setArg(0, image_buffer);
-    imageRotate.setArg(1, temp_buffer);
-    imageRotate.setArg(2, image_height);
-    imageRotate.setArg(3, image_width);
-    imageRotate.setArg(4, normalised_size);
-    imageRotate.setArg(5, 1);
-    res = params.queue->enqueueNDRangeKernel(imageRotate, cl::NullRange,  // kernel, offset
-            cl::NDRange(image_width, image_height), // global number of work items
-            cl::NDRange(1, 1));
-    
-    imageRotate.setArg(0, mask_buffer);
-    imageRotate.setArg(1, image_buffer);
-    imageRotate.setArg(2, image_height);
-    imageRotate.setArg(3, image_width);
-    imageRotate.setArg(4, normalised_size);
-    imageRotate.setArg(5, 1);
-    res = params.queue->enqueueNDRangeKernel(imageRotate, cl::NullRange,  // kernel, offset
-            cl::NDRange(image_width, image_height), // global number of work items
-            cl::NDRange(1, 1));
-    
+    /// Rotate image sizes
     std::swap(image_width, image_height);
     
+    /// Finds new mask
+    /// Apply gray filter
+    grayImage(grayFilter, *params.queue, temp_buffer, image_buffer, image_height, image_width, normalised_size);
+
+    /// Apply Sobel operator
+    sobelImage(sobelOperator, *params.queue, image_buffer, mask_buffer, image_height, image_width, normalised_size);
     
-    /// Search and remove of vertical seams (horisontal)
-    res = verticalSeam.setArg(0, image_buffer);
-    res = verticalSeam.setArg(1, image_height);
-    res = verticalSeam.setArg(3, normalised_size);
-    res = verticalSeam.setArg(6, directions_buffer);
-    res = verticalSeam.setArg(7, seam_points_buffer);
-
-    res = removeVerticalSeam.setArg(0, image_buffer);
-    res = removeVerticalSeam.setArg(1, temp_buffer);
-    res = removeVerticalSeam.setArg(2, image_height);
-    res = removeVerticalSeam.setArg(4, normalised_size);
-    res = removeVerticalSeam.setArg(5, seam_points_buffer);
-
+    
+    /// Horisontal
+    /// Remove seams
     for (int i = 0; i < cut_height; ++i) {
-        res = verticalSeam.setArg(2, image_width-i);
-        res = verticalSeam.setArg(4, sizeof(float)*normalised_size, nullptr);
-        res = verticalSeam.setArg(5, sizeof(float)*normalised_size, nullptr);
-        res = params.queue->enqueueNDRangeKernel(verticalSeam, cl::NullRange,
-                cl::NDRange(WORKGROUP_SIZE),
-                cl::NDRange(WORKGROUP_SIZE));
-
-
-        res = removeVerticalSeam.setArg(3, image_width-i);
-        res = params.queue->enqueueNDRangeKernel(removeVerticalSeam, cl::NullRange,
-                cl::NDRange(WORKGROUP_SIZE),
-                cl::NDRange(WORKGROUP_SIZE));
+        findSeam(verticalSeam, *params.queue, mask_buffer, directions_buffer, seam_points_buffer, image_height, image_width - i, normalised_size);
+        removeSeam(removeVerticalSeam, *params.queue, mask_buffer, temp_buffer, seam_points_buffer, image_height, image_width - i, normalised_size);
     }
     
+    /// Insert seams
+    for (int i = 0; i < -cut_height; ++i) {
+        findSeam(verticalSeam, *params.queue, mask_buffer, directions_buffer, seam_points_buffer, image_height, image_width + i, normalised_size);
+        insertSeam(insertVerticalSeam, *params.queue, temp_buffer, mask_buffer, seam_points_buffer, image_height, image_width + i, normalised_size);
+    }
+    
+    /// Reduce width (height of original image) after changing image
     image_width -= cut_height;
     
     /// Rotate again to normal
-    imageRotate.setArg(0, temp_buffer);
-    imageRotate.setArg(1, image_buffer);
-    imageRotate.setArg(5, 0);
-    imageRotate.setArg(2, image_height);
-    imageRotate.setArg(3, image_width);
-    res = params.queue->enqueueNDRangeKernel(imageRotate, cl::NullRange,  // kernel, offset
-            cl::NDRange(image_width, image_height), // global number of work items
-            cl::NDRange(1, 1));
+    /// temp -> image
+    rotateImage(imageRotate, *params.queue, temp_buffer, image_buffer, 0, image_height, image_width, normalised_size);
     
+    /// Rotate image sizes
     std::swap(image_width, image_height);
-    /// Read results
+
+
+    /// Load image from buffer
     res = params.queue->enqueueReadBuffer(image_buffer, CL_TRUE, 0, sizeof(float)* normalised_size * normalised_size, image);
     params.queue->finish();
 
     /// Convert float* back to bitmap
     size_t index = 0;
+    if (image_width*image_height > img.width()*img.height()) {
+        delete[] img.getImage().data;
+        img.getImage().data = new image::BMPColor [image_width*image_height];
+    }
     for (int i = 0; i < image_height; ++i) {
         for (int j = 0; j < image_width; ++j) {
             img.getImage().data[index] = image::BMPColor(((size_t) image[i*normalised_size + j])/(256*256),
@@ -219,5 +262,4 @@ void Algorithm::resizeBMPImage(image::Image<image::BMPImage, image::BMPColor> &i
     std::chrono::duration<double> elapsed = finish - start;
     std::cout << "Elapsed time: " << elapsed.count() << " s"<<std::endl;
 }
-
 }
