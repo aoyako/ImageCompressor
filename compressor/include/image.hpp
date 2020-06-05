@@ -12,6 +12,12 @@ namespace image {
     class Image
     {
     public:
+        
+        /**
+         * @brief Constructor from filename
+         */
+        Image(int x, int y, ColorOperator *c);
+        
         /**
          * @brief Constructor from filename
          */

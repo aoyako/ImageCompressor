@@ -8,12 +8,16 @@ namespace image {
     }
     
     template<typename ImageOperator, typename ColorOperator>
+    Image<ImageOperator, ColorOperator>::Image(int x, int y, ColorOperator *c) : _image(x, y, c) {
+    }
+    
+    template<typename ImageOperator, typename ColorOperator>
     Image<ImageOperator, ColorOperator>::Image(ImageOperator img) : _image(img)
     {
     }
     
     template<typename ImageOperator, typename ColorOperator>
-    Image<ImageOperator, ColorOperator>::Image(const Image &img) : _image(img.image)
+    Image<ImageOperator, ColorOperator>::Image(const Image &img) : _image(img._image)
     {
     }
     
@@ -25,7 +29,7 @@ namespace image {
     template<typename ImageOperator, typename ColorOperator>
     Image<ImageOperator, ColorOperator>& Image<ImageOperator, ColorOperator>::operator=(const Image &img)
     {
-            _image = img.image;
+            _image = img._image;
             return *this;
     }
 

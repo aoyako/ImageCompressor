@@ -13,7 +13,52 @@
 #include <saver.hpp>
 #include <seam.hpp>
 #include <execution.hpp>
+#include <QFutureWatcher>
+#include <image_adapter.hpp>
+#include <QPushButton>
 
+/**
+ * @brief Reacts when button is pushed and start the algorithm
+ */
+class Notifier : public QObject{
+    Q_OBJECT
+public:
+    Notifier(): result(1, 1, nullptr) {}
+    int run(image::Image<image::BMPImage, image::BMPColor> &img,
+                           int cut_width,
+                           int cut_height,
+                           const device::Params &params,
+                           const execution::Params &e_params) {
+        algorithm::Algorithm::resizeBMPImage(img, cut_width, cut_height, params, e_params);
+        return 0;
+    }
+    
+    void setImage(QImage *img) {
+        result = ImageWrapper(img);
+    }
+    
+    void setSaver(ImageSaver *s) {
+        saver = s;
+    }
+    
+    void setButton(QPushButton *b) {
+        button = b;
+    }
+    
+    /// Result image
+    image::Image<image::BMPImage, image::BMPColor> result;
+    /// Pointer to saver class
+    ImageSaver *saver;
+    /// Pointer to "process" button
+    QPushButton *button;
+    
+public slots:
+    /// Is called when algorithm is done
+    void finished() {
+        button->setEnabled(true);
+        saver->save(ImageWrapper(&result.getImage()));
+    };
+};
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -70,5 +115,10 @@ private:
      * @brief Changes processing device
      */
     Execution exec;
+    
+    Notifier n;
+    
+    QFutureWatcher<int> w;
 };
+
 #endif // MAINWINDOW_HPP

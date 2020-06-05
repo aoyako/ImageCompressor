@@ -3,6 +3,7 @@
 #include <image_adapter.hpp>
 
 #include <QImage>
+#include <QtCore>
 #include <QFileDialog>
 #include <seam.hpp>
 #include <iostream>
@@ -10,10 +11,12 @@
 #include <thread>
 #include <unistd.h>
 #include <sstream>
+#include <QtConcurrent/QtConcurrent>
+#include <QFutureWatcher>
 
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), exec()
+    : QMainWindow(parent), ui(new Ui::MainWindow), exec(), n()
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -35,6 +38,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->usegpu->setDown(false);
     exec.switchToCPU();
+    
+    n.setSaver(&saver);
+    n.setButton(ui->process);
+    
+    connect(&w, &QFutureWatcher<int>::finished, &n, &Notifier::finished);
 }
 
 MainWindow::~MainWindow()
@@ -72,19 +80,17 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::on_process_clicked()
 {
-    image::Image<image::BMPImage, image::BMPColor> result = ImageWrapper(&image.image);
+    ui->process->setEnabled(false);
 
     size_t new_width = ui->new_width->value();
     size_t new_height = ui->new_height->value();
 
-    auto handle = std::async(std::launch::async, algorithm::Algorithm::resizeBMPImage, std::ref(result),
+
+    n.setImage(&image.image);
+    QFuture<int> future = QtConcurrent::run(&n, &Notifier::run, std::ref(n.result),
                              (image.image.width()-new_width),
                              (image.image.height()-new_height), exec.getDeviceParams(), exec.getExecutionParams());
-
-    handle.get();
-    image.setImage(ImageWrapper(&result.getImage()));
-    saver.save(image.image);
-    image.backup();
+    w.setFuture(future);
 }
 
 void MainWindow::on_usegpu_stateChanged(int value)

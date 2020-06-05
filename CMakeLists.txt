@@ -11,8 +11,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/build)
 
 set(CMAKE_CXX_FLAGS "-pthread")
 
-message($ENV{USER})
-set(DEBUG ON CACHE BOOL "For local debugging" FORCE)
+add_compile_definitions(USER_PATH="/home/$ENV{USER}")
+set(DEBUG ON CACHE BOOL "For local debugging")
 if (DEBUG)
     set(CMAKE_BUILD_TYPE Debug)
     add_compile_definitions(KERNEL_PATH="kernel.cl")

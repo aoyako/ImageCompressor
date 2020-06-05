@@ -6,7 +6,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets Core REQUIRED)
 find_package(OpenCL 2.2 REQUIRED)
 
 set(SOURCE_FILES
@@ -32,6 +32,7 @@ target_link_libraries(ImageCompressor PRIVATE OpenCL::OpenCL)
 
 target_link_libraries(ImageCompressor PRIVATE 
     Qt5::Widgets
+    Qt5::Core
 )
 
 target_link_libraries(ImageCompressor PRIVATE
