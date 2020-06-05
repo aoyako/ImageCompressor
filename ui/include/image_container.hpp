@@ -28,8 +28,9 @@ public:
      */
     QImage image;
 
+private:
     /**
      * @brief Backup image
      */
-    QImage backup_image;
+    QImage _backup_image;
 };

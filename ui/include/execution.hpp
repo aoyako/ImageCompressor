@@ -50,10 +50,14 @@ public:
      */
     std::vector<device::Params> devices;
 
+private:
     /**
      * @brief Selected device (index in "devices")
      */
-    size_t device_option = 0;
+    size_t _device_option = 0;
 
-    bool advanced_alg = false;
+    /**
+     * @brief Indicated if forward energy algorithm should be used
+     */
+    bool _advanced_alg = false;
 };

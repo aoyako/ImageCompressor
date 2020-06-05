@@ -36,16 +36,16 @@ namespace image {
         /**
          * @brief Value of red component in RGB palette
          */
-        unsigned char red_color;
+        unsigned char _red;
         
         /**
          * @brief Value of red component in RGB palette
          */
-        unsigned char green_color;
+        unsigned char _green;
         
         /**
          * @brief Value of red component in RGB palette
          */
-        unsigned char blue_color;
+        unsigned char _blue;
     };
 }

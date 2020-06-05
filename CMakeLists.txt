@@ -25,8 +25,13 @@ endif()
 
 set(ALGORITHM_DIR "compressor/")
 set(UI_DIR "ui/")
+set(TESTS_DIR "tests/")
+set(MODULE_GTEST "modules/gtest/")
 
 add_subdirectory(${ALGORITHM_DIR})
 add_subdirectory(${UI_DIR})
+add_subdirectory(${MODULE_GTEST})
+add_subdirectory(${TESTS_DIR})
+
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/compressor/kernel.cl ${CMAKE_BINARY_DIR} COPYONLY)

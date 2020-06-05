@@ -14,9 +14,8 @@ Execution::Execution() {
     for (auto const &platrform : all_platforms) {
         initDevices(platrform);
     }
-//     initDevices(all_platforms[1]);
 
-    device_option = all_platforms.size()-1;
+    _device_option = all_platforms.size()-1;
 }
 
 void Execution::initDevices(const cl::Platform &platform) {
@@ -57,21 +56,21 @@ void Execution::initDevices(const cl::Platform &platform) {
 }
 
 device::Params Execution::getDeviceParams() {
-    return devices[device_option];
+    return devices[_device_option];
 }
 
 execution::Params Execution::getExecutionParams() {
-    return execution::Params{advanced_alg};
+    return execution::Params{_advanced_alg};
 }
 
 void Execution::switchToGPU() {
-    device_option = 0;
+    _device_option = 0;
 }
 
 void Execution::switchToCPU() {
-    device_option = devices.size()-1;
+    _device_option = devices.size()-1;
 }
 
 void Execution::setPrettyView(bool value) {
-    advanced_alg = value;
+    _advanced_alg = value;
 }

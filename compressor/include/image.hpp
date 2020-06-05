@@ -61,7 +61,7 @@ namespace image {
         /**
          * @brief Image object
          */
-        ImageOperator image;
+        ImageOperator _image;
     };
 
 }

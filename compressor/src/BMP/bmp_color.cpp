@@ -2,24 +2,24 @@
 
 namespace image {
     
-    BMPColor::BMPColor(unsigned char red, unsigned char green, unsigned char blue) : red_color(red), green_color(green), blue_color(blue)
+    BMPColor::BMPColor(unsigned char red, unsigned char green, unsigned char blue) : _red(red), _green(green), _blue(blue)
     {
     }
 
-    BMPColor::BMPColor(const BMPColor &col) : red_color(col.red()), green_color(col.green()), blue_color(col.blue())
+    BMPColor::BMPColor(const BMPColor &col) : _red(col.red()), _green(col.green()), _blue(col.blue())
     {
     }
     
     unsigned char BMPColor::red() const {
-        return red_color;
+        return _red;
     }
 
     unsigned char BMPColor::green() const {
-        return green_color;
+        return _green;
     }
 
     unsigned char BMPColor::blue() const {
-        return blue_color;
+        return _blue;
     }
     
 }

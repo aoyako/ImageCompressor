@@ -23,7 +23,7 @@ namespace device {
         std::shared_ptr<cl::Program> program;
         cl::Platform platform;
     };
-}
+} // namespace device
 
 namespace execution {
     /**
@@ -33,7 +33,7 @@ namespace execution {
     public:
         bool advanced;
     };
-}
+} // namespace execution
 
 namespace algorithm {
     /**
@@ -48,8 +48,16 @@ namespace algorithm {
                                    const execution::Params &e_params
                                   );
     private:
-        size_t previous_width;
-        size_t previous_height;
+        size_t _previous_width;
+        size_t _previous_height;
     };
     
-}
+namespace utils {
+    /**
+    * @brief Calculates number power of two, which is euqual or bigger than "n"
+    */
+    size_t nextPowerOf2(size_t n);
+
+} // namespace utils
+
+} // namespace algorithm
